@@ -1,209 +1,124 @@
-// Student Tools - Cloudflare Worker backend (PIN accounts + protected /dashboard)
-// Bindings: DB (D1), ASSETS (static files)
-// Secret:   SESSION_SECRET  (long random text; signs sessions and is mixed into PIN hashes)
+(function(){
+  "use strict";
+  var S=window.SITE||{};
+  var KEY="sdStudent";
+  function $(id){return document.getElementById(id)}
+  function saved(){try{var o=JSON.parse(localStorage.getItem(KEY));return o&&o.id?o:null}catch(e){return null}}
+  function setSaved(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
+  function clearSaved(){try{localStorage.removeItem(KEY)}catch(e){}}
+  // Session token: kept only for this tab/app session (sessionStorage), sent as an Authorization header.
+  var TK="sdToken";
+  function getTok(){try{return sessionStorage.getItem(TK)||""}catch(e){return ""}}
+  function setTok(t){try{if(t)sessionStorage.setItem(TK,t);else sessionStorage.removeItem(TK)}catch(e){}}
+  function api(path,body){
+    return fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(body||{})})
+      .then(function(r){return r.json().catch(function(){return{}}).then(function(d){d.status=r.status;return d})})
+      .catch(function(){return{error:"Can't reach the server. Check your internet and try again.",status:0}});
+  }
 
-const enc = new TextEncoder();
-const SESSION_SECONDS = 2 * 60 * 60; // a session lasts at most 2 hours (the app also locks itself on every open)
-const MAX_FAILS = 5;                 // wrong PINs before the account locks
-const LOCK_MS = 15 * 60 * 1000;      // lock time
-const IP_WINDOW_MS = 15 * 60 * 1000;
-const IP_LIMIT = 40;                 // failed logins / signups per IP in the window
-const PBKDF2_ITERATIONS = 100000;    // the Workers runtime maximum
+  // The dashboard is locked every time the app opens or the page is shown again.
+  function lock(){setTok("");fetch("/api/logout",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"}).catch(function(){})}
+  lock();
+  addEventListener("pageshow",function(e){if(e.persisted)lock()});
 
-const ID_RE = /^[A-Z0-9]{5,20}$/;
-const PIN_RE = /^[0-9]{4}$/;
+  var calc=$("calcCard"),dash=$("dashCard"),gate=$("gate");
+  if(S.calculatorUrl)calc.href=S.calculatorUrl;
+  // Inside the portal app (framed) open the calculator in the same view, not a new browser tab.
+  try{if(window.top!==window.self)calc.removeAttribute("target")}catch(e){calc.removeAttribute("target")}
 
-const SCHEMA = [
-  `CREATE TABLE IF NOT EXISTS students (student_id TEXT PRIMARY KEY, nickname TEXT NOT NULL, pin_hash TEXT NOT NULL, salt TEXT NOT NULL, fails INTEGER NOT NULL DEFAULT 0, locked_until INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT (datetime('now')))`,
-  `CREATE TABLE IF NOT EXISTS roster (student_id TEXT PRIMARY KEY)`,
-  `CREATE TABLE IF NOT EXISTS ip_attempts (ip TEXT NOT NULL, ts INTEGER NOT NULL)`,
-  `CREATE INDEX IF NOT EXISTS idx_ip ON ip_attempts (ip, ts)`,
-];
-let schemaReady = null;
-function ensureSchema(env) {
-  if (!schemaReady) schemaReady = env.DB.batch(SCHEMA.map((s) => env.DB.prepare(s))).catch((e) => { schemaReady = null; throw e; });
-  return schemaReady;
-}
+  var views=["choice","pin","signin","signup"];
+  var cur=null,pin="",busy=false,lastFocus=null;
+  function show(name){
+    views.forEach(function(v){$("v-"+v).classList.toggle("hidden",v!==name)});
+    ["pinErr","siErr","suErr"].forEach(function(id){$(id).textContent=""});
+    if(name==="pin"){pin="";dots()}
+    var f={signin:"si-id",signup:"su-id"}[name];if(f)setTimeout(function(){$(f).focus()},50);
+  }
+  function openGate(){
+    lastFocus=document.activeElement;
+    gate.classList.remove("hidden");document.body.style.overflow="hidden";
+    var s=saved();
+    if(s){cur=s;$("pinWho").textContent="Hi, "+s.nick;show("pin")}else show("choice");
+  }
+  function closeGate(){gate.classList.add("hidden");document.body.style.overflow="";pin="";if(lastFocus&&lastFocus.focus)lastFocus.focus()}
+  function goDashboard(){
+    var url=S.dashboardUrl||"/dashboard/",t=getTok();
+    if(!t||url.charAt(0)!=="/"){location.href=url;return}
+    // Fetch the protected page with the token, then show it here (works even when cookies are blocked, e.g. inside the portal app).
+    fetch(url,{headers:{Authorization:"Bearer "+t},credentials:"same-origin",cache:"no-store"})
+      .then(function(r){
+        if(!r.ok||(r.headers.get("content-type")||"").indexOf("text/html")<0)throw new Error("locked");
+        return r.text();
+      })
+      .then(function(html){document.open();document.write(html);document.close()})
+      .catch(function(){location.href=url});
+  }
 
-function json(data, status = 200, headers = {}) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...headers },
+  dash.addEventListener("click",function(e){e.preventDefault();openGate()});
+  $("gateClose").addEventListener("click",closeGate);
+  gate.addEventListener("click",function(e){if(e.target===gate)closeGate()});
+  Array.prototype.forEach.call(document.querySelectorAll("[data-go]"),function(b){b.addEventListener("click",function(){show(b.dataset.go)})});
+
+  /* ---------- PIN keypad ---------- */
+  var kp=$("keypad");
+  ["1","2","3","4","5","6","7","8","9","","0","del"].forEach(function(k){
+    var b=document.createElement("button");b.type="button";
+    if(k===""){b.className="key blank";b.disabled=true;b.setAttribute("aria-hidden","true")}
+    else if(k==="del"){b.className="key";b.setAttribute("aria-label","Delete");b.innerHTML='<svg class="ic" aria-hidden="true"><use href="#i-back"/></svg>';b.addEventListener("click",function(){press("del")})}
+    else{b.className="key";b.textContent=k;b.addEventListener("click",function(){press(k)})}
+    kp.appendChild(b);
   });
-}
-
-async function getSecret(env) {
-  const v = env.SESSION_SECRET;
-  if (!v) return "";
-  if (typeof v === "string") return v;
-  if (typeof v.get === "function") return String((await v.get()) ?? "");
-  return "";
-}
-
-const toHex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
-const fromHex = (hex) => new Uint8Array(hex.match(/../g).map((h) => parseInt(h, 16)));
-
-function safeEqual(a, b) {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
-
-async function hmacHex(secret, message) {
-  const key = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  return toHex(await crypto.subtle.sign("HMAC", key, enc.encode(message)));
-}
-
-// PIN hash = PBKDF2(pin + secret, per-student random salt). The secret is not stored in the database.
-async function hashPin(secret, pin, saltHex) {
-  const mat = await crypto.subtle.importKey("raw", enc.encode(pin + "|" + secret), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: fromHex(saltHex), iterations: PBKDF2_ITERATIONS }, mat, 256);
-  return toHex(bits);
-}
-
-function getCookie(request, name) {
-  for (const part of (request.headers.get("Cookie") || "").split(";")) {
-    const [k, ...rest] = part.trim().split("=");
-    if (k === name) return rest.join("=");
+  function dots(){var d=$("dots").children;for(var i=0;i<4;i++)d[i].className=i<pin.length?"on":""}
+  function press(k){
+    if(busy)return;
+    $("pinErr").textContent="";
+    if(k==="del")pin=pin.slice(0,-1);else if(pin.length<4)pin+=k;
+    dots();
+    if(pin.length===4)submitPin();
   }
-  return "";
-}
-function sessionCookie(value, maxAge) {
-  return `sd_session=${value}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${maxAge}`;
-}
-
-async function makeToken(secret, studentId) {
-  const exp = Date.now() + SESSION_SECONDS * 1000;
-  return `${studentId}.${exp}.${await hmacHex(secret, `s:${studentId}:${exp}`)}`;
-}
-
-// Returns { id, nick } for a valid session, otherwise null.
-async function getSession(request, env) {
-  const secret = await getSecret(env);
-  if (!secret) return null;
-  const token = getCookie(request, "sd_session");
-  const [id, expStr, sig] = token.split(".");
-  const exp = Number(expStr);
-  if (!id || !sig || !exp || exp < Date.now() || !ID_RE.test(id)) return null;
-  if (!safeEqual(sig, await hmacHex(secret, `s:${id}:${exp}`))) return null;
-  const row = await env.DB.prepare(`SELECT nickname FROM students WHERE student_id = ?`).bind(id).first();
-  return row ? { id, nick: row.nickname } : null;
-}
-
-async function readBody(request) {
-  try { const d = await request.json(); return d && typeof d === "object" ? d : {}; } catch { return {}; }
-}
-const cleanId = (v) => String(v ?? "").trim().toUpperCase().replace(/\s+/g, "");
-const cleanNick = (v) => String(v ?? "").replace(/[\u0000-\u001f\u007f<>]/g, "").trim().replace(/\s+/g, " ");
-
-async function ipBlocked(env, ip) {
-  const now = Date.now();
-  await env.DB.prepare(`DELETE FROM ip_attempts WHERE ts < ?`).bind(now - 60 * 60 * 1000).run();
-  const r = await env.DB.prepare(`SELECT COUNT(*) AS n FROM ip_attempts WHERE ip = ? AND ts > ?`).bind(ip, now - IP_WINDOW_MS).first();
-  return (r?.n || 0) >= IP_LIMIT;
-}
-const noteAttempt = (env, ip) => env.DB.prepare(`INSERT INTO ip_attempts (ip, ts) VALUES (?, ?)`).bind(ip, Date.now()).run();
-
-async function signup(request, env, secret, ip) {
-  if (await ipBlocked(env, ip)) return json({ error: "Too many attempts. Please try again later." }, 429);
-  await noteAttempt(env, ip);
-  const b = await readBody(request);
-  const id = cleanId(b.studentId), id2 = cleanId(b.studentId2);
-  const nick = cleanNick(b.nickname), pin = String(b.pin ?? ""), pin2 = String(b.pin2 ?? "");
-  if (!ID_RE.test(id)) return json({ error: "Enter a valid Student ID (letters and numbers, 5 to 20 characters)." }, 400);
-  if (id !== id2) return json({ error: "The two Student IDs do not match." }, 400);
-  if (nick.length < 2 || nick.length > 24) return json({ error: "Nickname must be 2 to 24 characters." }, 400);
-  if (!PIN_RE.test(pin)) return json({ error: "PIN must be exactly 4 digits." }, 400);
-  if (pin !== pin2) return json({ error: "The two PINs do not match." }, 400);
-
-  const rosterCount = (await env.DB.prepare(`SELECT COUNT(*) AS n FROM roster`).first())?.n || 0;
-  if (rosterCount > 0) {
-    const ok = await env.DB.prepare(`SELECT 1 AS x FROM roster WHERE student_id = ?`).bind(id).first();
-    if (!ok) return json({ error: "This Student ID is not on the class list. Ask your CR." }, 403);
+  function submitPin(){
+    busy=true;
+    api("/api/login",{studentId:cur.id,pin:pin}).then(function(d){
+      busy=false;
+      if(d.ok){setSaved({id:d.studentId,nick:d.nickname});setTok(d.token);goDashboard();return}
+      $("pinErr").textContent=d.error||"Something went wrong.";
+      var el=$("dots");el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake");
+      pin="";dots();
+    });
   }
-  const salt = toHex(crypto.getRandomValues(new Uint8Array(16)));
-  const pinHash = await hashPin(secret, pin, salt);
-  const res = await env.DB.prepare(`INSERT OR IGNORE INTO students (student_id, nickname, pin_hash, salt) VALUES (?, ?, ?, ?)`).bind(id, nick, pinHash, salt).run();
-  if (!res.meta?.changes) return json({ error: "An account with this Student ID already exists. Please sign in." }, 409);
-  const token = await makeToken(secret, id);
-  return json({ ok: true, studentId: id, nickname: nick }, 200, { "Set-Cookie": sessionCookie(token, SESSION_SECONDS) });
-}
+  $("notYou").addEventListener("click",function(){clearSaved();cur=null;show("signin")});
+  addEventListener("keydown",function(e){
+    if(gate.classList.contains("hidden"))return;
+    if(e.key==="Escape"){closeGate();return}
+    if($("v-pin").classList.contains("hidden"))return;
+    if(/^[0-9]$/.test(e.key))press(e.key);else if(e.key==="Backspace")press("del");
+  });
 
-async function login(request, env, secret, ip) {
-  if (await ipBlocked(env, ip)) return json({ error: "Too many attempts. Please try again later." }, 429);
-  const b = await readBody(request);
-  const id = cleanId(b.studentId), pin = String(b.pin ?? "");
-  const generic = () => json({ error: "Wrong Student ID or PIN." }, 401);
-  if (!ID_RE.test(id) || !PIN_RE.test(pin)) return generic();
+  /* ---------- Sign in (new device) ---------- */
+  function normId(v){return String(v||"").trim().toUpperCase().replace(/\s+/g,"")}
+  $("siGo").addEventListener("click",function(){
+    var id=normId($("si-id").value);
+    if(!/^[A-Z0-9]{5,20}$/.test(id)){$("siErr").textContent="Enter your Student ID.";return}
+    cur={id:id,nick:""};$("pinWho").textContent="Student ID "+id;show("pin");
+  });
+  $("si-id").addEventListener("keydown",function(e){if(e.key==="Enter")$("siGo").click()});
 
-  const row = await env.DB.prepare(`SELECT nickname, pin_hash, salt, fails, locked_until FROM students WHERE student_id = ?`).bind(id).first();
-  if (!row) {
-    await hashPin(secret, pin, "00".repeat(16)); // same work as a real check, so timing does not reveal accounts
-    await noteAttempt(env, ip);
-    return generic();
-  }
-  const now = Date.now();
-  if (row.locked_until > now) {
-    const mins = Math.ceil((row.locked_until - now) / 60000);
-    return json({ error: `Too many wrong PINs. Try again in ${mins} minute${mins === 1 ? "" : "s"}.`, locked: true }, 429);
-  }
-  if (safeEqual(await hashPin(secret, pin, row.salt), row.pin_hash)) {
-    await env.DB.prepare(`UPDATE students SET fails = 0, locked_until = 0 WHERE student_id = ?`).bind(id).run();
-    const token = await makeToken(secret, id);
-    return json({ ok: true, studentId: id, nickname: row.nickname }, 200, { "Set-Cookie": sessionCookie(token, SESSION_SECONDS) });
-  }
-  await noteAttempt(env, ip);
-  const fails = row.fails + 1;
-  if (fails >= MAX_FAILS) {
-    await env.DB.prepare(`UPDATE students SET fails = 0, locked_until = ? WHERE student_id = ?`).bind(now + LOCK_MS, id).run();
-    return json({ error: "Too many wrong PINs. This account is locked for 15 minutes.", locked: true }, 429);
-  }
-  await env.DB.prepare(`UPDATE students SET fails = ? WHERE student_id = ?`).bind(fails, id).run();
-  const left = MAX_FAILS - fails;
-  return json({ error: `Wrong PIN. ${left} attempt${left === 1 ? "" : "s"} left.` }, 401);
-}
+  /* ---------- Sign up ---------- */
+  $("suGo").addEventListener("click",function(){
+    if(busy)return;
+    var id=normId($("su-id").value),id2=normId($("su-id2").value),nick=$("su-nick").value.trim(),p=$("su-pin").value,p2=$("su-pin2").value,err=$("suErr");
+    if(!/^[A-Z0-9]{5,20}$/.test(id)){err.textContent="Enter a valid Student ID.";return}
+    if(id!==id2){err.textContent="The two Student IDs do not match.";return}
+    if(nick.length<2){err.textContent="Please enter a nickname (at least 2 characters).";return}
+    if(!/^[0-9]{4}$/.test(p)){err.textContent="PIN must be exactly 4 digits.";return}
+    if(p!==p2){err.textContent="The two PINs do not match.";return}
+    busy=true;err.textContent="";$("suGo").disabled=true;
+    api("/api/signup",{studentId:id,studentId2:id2,nickname:nick,pin:p,pin2:p2}).then(function(d){
+      busy=false;$("suGo").disabled=false;
+      if(d.ok){setSaved({id:d.studentId,nick:d.nickname});setTok(d.token);goDashboard();return}
+      err.textContent=d.error||"Something went wrong.";
+    });
+  });
 
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
-    const path = url.pathname;
-    const isApi = path.startsWith("/api/");
-    const isDash = path === "/dashboard" || path.startsWith("/dashboard/");
-    if (!isApi && !isDash) return env.ASSETS.fetch(request);
-
-    try {
-      await ensureSchema(env);
-      const secret = await getSecret(env);
-      if (!secret) return json({ error: "Server is not set up yet (SESSION_SECRET is missing)." }, 500);
-
-      // Protected dashboard files: only with a valid PIN session.
-      if (isDash) {
-        const sess = await getSession(request, env);
-        if (!sess) return new Response(null, { status: 302, headers: { Location: "/?unlock=1", "Cache-Control": "no-store" } });
-        const res = await env.ASSETS.fetch(request);
-        const out = new Response(res.body, res);
-        out.headers.set("Cache-Control", "private, no-store");
-        return out;
-      }
-
-      if (request.method === "GET" && path === "/api/me") {
-        const sess = await getSession(request, env);
-        return sess ? json({ ok: true, studentId: sess.id, nickname: sess.nick }) : json({ ok: false }, 401);
-      }
-
-      if (request.method !== "POST") return json({ error: "Not found." }, 404);
-      // Block cross-site form posts
-      const origin = request.headers.get("Origin");
-      if (origin) { try { if (new URL(origin).host !== url.host) return json({ error: "Forbidden." }, 403); } catch { return json({ error: "Forbidden." }, 403); } }
-
-      const ip = request.headers.get("CF-Connecting-IP") || "local";
-      if (path === "/api/signup") return await signup(request, env, secret, ip);
-      if (path === "/api/login") return await login(request, env, secret, ip);
-      if (path === "/api/logout") return json({ ok: true }, 200, { "Set-Cookie": sessionCookie("", 0) });
-      return json({ error: "Not found." }, 404);
-    } catch (e) {
-      return json({ error: "Something went wrong on the server." }, 500);
-    }
-  },
-};
+  if(/[?&]unlock=1/.test(location.search)){history.replaceState(null,"",location.pathname);openGate()}
+})();
