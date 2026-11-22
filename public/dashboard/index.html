@@ -26,13 +26,15 @@
   </main>
 </div>
 <script>
-fetch("/api/me",{credentials:"same-origin"}).then(function(r){return r.json()}).then(function(d){
+var tk="";try{tk=sessionStorage.getItem("sdToken")||""}catch(e){}
+function authHeaders(extra){var h=extra||{};if(tk)h.Authorization="Bearer "+tk;return h}
+fetch("/api/me",{credentials:"same-origin",headers:authHeaders()}).then(function(r){return r.json()}).then(function(d){
   if(!d.ok){location.replace("/?unlock=1");return}
   document.getElementById("hello").textContent="Hi, "+d.nickname;
   document.getElementById("who").textContent="Student ID "+d.studentId;
 }).catch(function(){});
 document.getElementById("lockBtn").addEventListener("click",function(){
-  fetch("/api/logout",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"}).finally(function(){location.href="/"});
+  fetch("/api/logout",{method:"POST",credentials:"same-origin",headers:authHeaders({"Content-Type":"application/json"}),body:"{}"}).finally(function(){try{sessionStorage.removeItem("sdToken")}catch(e){}location.href="/"});
 });
 addEventListener("pageshow",function(e){if(e.persisted)location.reload()});
 </script>
