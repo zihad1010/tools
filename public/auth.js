@@ -19,6 +19,8 @@
 
   var calc=$("calcCard"),dash=$("dashCard"),gate=$("gate");
   if(S.calculatorUrl)calc.href=S.calculatorUrl;
+  // Inside the portal app (framed) open the calculator in the same view, not a new browser tab.
+  try{if(window.top!==window.self)calc.removeAttribute("target")}catch(e){calc.removeAttribute("target")}
 
   var views=["choice","pin","signin","signup"];
   var cur=null,pin="",busy=false,lastFocus=null;
