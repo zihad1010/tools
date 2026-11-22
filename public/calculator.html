@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f2ec">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem("bupTheme")||"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <title>CG Calculator</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+</defs></svg>
+<div class="app">
+  <header class="topbar">
+    <a id="homeLink" class="icon-btn" href="index.html" aria-label="Home"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg></a>
+    <strong style="font-size:17px;font-weight:600">CG Calculator</strong>
+    <button id="themeToggle" class="icon-btn" aria-label="Switch light or dark mode"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
+  </header>
+
+  <nav class="pills" role="tablist" aria-label="Calculator type">
+    <button role="tab" id="t-cg" aria-selected="true" aria-controls="p-cg" data-tab="cg">Total CG</button>
+    <button role="tab" id="t-inc" aria-selected="false" aria-controls="p-inc" data-tab="inc">Incourse</button>
+    <button role="tab" id="t-ct" aria-selected="false" aria-controls="p-ct" data-tab="ct">CT</button>
+    <button role="tab" id="t-mid" aria-selected="false" aria-controls="p-mid" data-tab="mid">Mid</button>
+  </nav>
+
+  <!-- TOTAL CG -->
+  <section id="p-cg" class="panel active" role="tabpanel" aria-labelledby="t-cg">
+    <div class="result" aria-live="polite">
+      <div class="lbl">Overall CGPA</div>
+      <div class="big" id="cg-out">--</div>
+      <div class="sub"><span>Credits <b id="cg-cr">0</b></span><span>This semester <b id="cg-sem">--</b></span></div>
+    </div>
+    <div class="card">
+      <h3>Previous result (optional)</h3>
+      <p class="hint">Add your CGPA and credits so far to include them.</p>
+      <div class="grid2">
+        <div class="field"><label for="cg-prev">Previous CGPA</label><input id="cg-prev" inputmode="decimal" placeholder="e.g. 3.50"></div>
+        <div class="field"><label for="cg-prevc">Credits done</label><input id="cg-prevc" inputmode="decimal" placeholder="e.g. 30"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Courses</h3>
+      <p class="hint">Course name, credit and grade.</p>
+      <div id="cg-rows"></div>
+      <button class="add" data-add="cg">+ Add course</button>
+    </div>
+    <div class="card">
+      <h3>Grade scale</h3>
+      <div class="scale" id="scale"></div>
+    </div>
+  </section>
+
+  <!-- INCOURSE -->
+  <section id="p-inc" class="panel" role="tabpanel" aria-labelledby="t-inc">
+    <div class="result" aria-live="polite">
+      <div class="lbl">Incourse total (you have)</div>
+      <div class="big" id="inc-out">--</div>
+      <div class="sub"><span>Percent <b id="inc-pct">--</b></span></div>
+    </div>
+    <div class="card">
+      <h3>Incourse parts</h3>
+      <p class="hint">Mid (20), CT, attendance, assignment etc. Marks you got and full marks.</p>
+      <div id="inc-rows"></div>
+      <button class="add" data-add="inc">+ Add part</button>
+    </div>
+    <div class="card">
+      <h3>Marks settings</h3>
+      <p class="hint">Course total is Incourse + Final (converted).</p>
+      <div class="grid2">
+        <div class="field"><label for="inc-max">Incourse full marks</label><input id="inc-max" inputmode="decimal" placeholder="50"></div>
+        <div class="field"><label for="inc-fw">Final converted to</label><input id="inc-fw" inputmode="decimal" placeholder="50"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Final exam: marks needed (out of 100)</h3>
+      <p class="hint" id="inc-hint">Fill in your incourse marks to see this.</p>
+      <table class="need" id="need-tbl" aria-live="polite">
+        <thead><tr><th>Grade</th><th>Course total</th><th>Final /100</th></tr></thead>
+        <tbody id="need-body"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CT -->
+  <section id="p-ct" class="panel" role="tabpanel" aria-labelledby="t-ct">
+    <div class="result" aria-live="polite">
+      <div class="lbl">CT average</div>
+      <div class="big" id="ct-out">--</div>
+      <div class="sub"><span>Counted <b id="ct-cnt">0</b></span><span>Scaled <b id="ct-sc">--</b></span></div>
+    </div>
+    <div class="card">
+      <h3>Class tests</h3>
+      <p class="hint">Marks you got and full marks for each CT.</p>
+      <div id="ct-rows"></div>
+      <button class="add" data-add="ct">+ Add CT</button>
+    </div>
+    <div class="card">
+      <h3>Settings</h3>
+      <div class="grid2">
+        <div class="field"><label for="ct-best">Best how many?</label><input id="ct-best" inputmode="numeric" placeholder="All"></div>
+        <div class="field"><label for="ct-w">CT weight (marks)</label><input id="ct-w" inputmode="decimal" placeholder="e.g. 10"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MID -->
+  <section id="p-mid" class="panel" role="tabpanel" aria-labelledby="t-mid">
+    <div class="result" aria-live="polite">
+      <div class="lbl">Mid percent<span class="chip" id="mid-l">--</span></div>
+      <div class="big" id="mid-out">--</div>
+      <div class="sub"><span>Scaled <b id="mid-sc">--</b></span></div>
+    </div>
+    <div class="card">
+      <h3>Mid exam</h3>
+      <div class="grid2">
+        <div class="field"><label for="mid-g">Marks got</label><input id="mid-g" inputmode="decimal" placeholder="e.g. 22"></div>
+        <div class="field"><label for="mid-o">Full marks</label><input id="mid-o" inputmode="decimal" placeholder="e.g. 30"></div>
+      </div>
+      <div class="field" style="margin-top:10px"><label for="mid-w">Mid weight in course (marks)</label><input id="mid-w" inputmode="decimal" placeholder="e.g. 20"></div>
+    </div>
+  </section>
+</div>
+<script src="./config.js"></script>
+<script src="./common.js"></script>
+<script src="./calc.js"></script>
+</body>
+</html>
