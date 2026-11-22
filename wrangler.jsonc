@@ -13,7 +13,7 @@
       "binding": "DB",
       "database_name": "student-tools-db",
       // Replace with the id printed by: npx wrangler d1 create student-tools-db
-      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+      "database_id": "9b6c1057-9957-4200-af34-b54512b0aaca"
     }
   ]
 }
