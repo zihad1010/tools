@@ -6,6 +6,10 @@
   function saved(){try{var o=JSON.parse(localStorage.getItem(KEY));return o&&o.id?o:null}catch(e){return null}}
   function setSaved(o){try{localStorage.setItem(KEY,JSON.stringify(o))}catch(e){}}
   function clearSaved(){try{localStorage.removeItem(KEY)}catch(e){}}
+  // Session token: kept only for this tab/app session (sessionStorage), sent as an Authorization header.
+  var TK="sdToken";
+  function getTok(){try{return sessionStorage.getItem(TK)||""}catch(e){return ""}}
+  function setTok(t){try{if(t)sessionStorage.setItem(TK,t);else sessionStorage.removeItem(TK)}catch(e){}}
   function api(path,body){
     return fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",body:JSON.stringify(body||{})})
       .then(function(r){return r.json().catch(function(){return{}}).then(function(d){d.status=r.status;return d})})
@@ -13,7 +17,7 @@
   }
 
   // The dashboard is locked every time the app opens or the page is shown again.
-  function lock(){fetch("/api/logout",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"}).catch(function(){})}
+  function lock(){setTok("");fetch("/api/logout",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:"{}"}).catch(function(){})}
   lock();
   addEventListener("pageshow",function(e){if(e.persisted)lock()});
 
@@ -37,7 +41,18 @@
     if(s){cur=s;$("pinWho").textContent="Hi, "+s.nick;show("pin")}else show("choice");
   }
   function closeGate(){gate.classList.add("hidden");document.body.style.overflow="";pin="";if(lastFocus&&lastFocus.focus)lastFocus.focus()}
-  function goDashboard(){location.href=S.dashboardUrl||"/dashboard/"}
+  function goDashboard(){
+    var url=S.dashboardUrl||"/dashboard/",t=getTok();
+    if(!t||url.charAt(0)!=="/"){location.href=url;return}
+    // Fetch the protected page with the token, then show it here (works even when cookies are blocked, e.g. inside the portal app).
+    fetch(url,{headers:{Authorization:"Bearer "+t},credentials:"same-origin",cache:"no-store"})
+      .then(function(r){
+        if(!r.ok||(r.headers.get("content-type")||"").indexOf("text/html")<0)throw new Error("locked");
+        return r.text();
+      })
+      .then(function(html){document.open();document.write(html);document.close()})
+      .catch(function(){location.href=url});
+  }
 
   dash.addEventListener("click",function(e){e.preventDefault();openGate()});
   $("gateClose").addEventListener("click",closeGate);
@@ -65,7 +80,7 @@
     busy=true;
     api("/api/login",{studentId:cur.id,pin:pin}).then(function(d){
       busy=false;
-      if(d.ok){setSaved({id:d.studentId,nick:d.nickname});goDashboard();return}
+      if(d.ok){setSaved({id:d.studentId,nick:d.nickname});setTok(d.token);goDashboard();return}
       $("pinErr").textContent=d.error||"Something went wrong.";
       var el=$("dots");el.classList.remove("shake");void el.offsetWidth;el.classList.add("shake");
       pin="";dots();
@@ -100,7 +115,7 @@
     busy=true;err.textContent="";$("suGo").disabled=true;
     api("/api/signup",{studentId:id,studentId2:id2,nickname:nick,pin:p,pin2:p2}).then(function(d){
       busy=false;$("suGo").disabled=false;
-      if(d.ok){setSaved({id:d.studentId,nick:d.nickname});goDashboard();return}
+      if(d.ok){setSaved({id:d.studentId,nick:d.nickname});setTok(d.token);goDashboard();return}
       err.textContent=d.error||"Something went wrong.";
     });
   });
