@@ -5,6 +5,8 @@ window.SITE = {
   dashboardUrl: "/dashboard/",
   // Calculator opens in a new browser tab
   calculatorUrl: "calculator.html",
+  // Cover Page Generator page. Leave empty to make the card show "Coming soon".
+  coverUrl: "cover.html",
   // Back link shown on the calculator page (your PWA home), e.g. "https://your-pwa.com/"
   homeUrl: "index.html"
 };
