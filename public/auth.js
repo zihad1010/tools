@@ -22,6 +22,11 @@
   addEventListener("pageshow",function(e){if(e.persisted)lock()});
 
   var calc=$("calcCard"),dash=$("dashCard"),gate=$("gate");
+  var cover=$("coverCard");
+  if(cover){
+    if(S.coverUrl){cover.href=S.coverUrl}
+    else{cover.addEventListener("click",function(e){e.preventDefault();window.toast&&window.toast("Coming soon.")})}
+  }
   if(S.calculatorUrl)calc.href=S.calculatorUrl;
   // Inside the portal app (framed) open the calculator in the same view, not a new browser tab.
   try{if(window.top!==window.self)calc.removeAttribute("target")}catch(e){calc.removeAttribute("target")}
