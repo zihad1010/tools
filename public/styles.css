@@ -172,7 +172,6 @@ main>.card:first-of-type{margin-top:20px}
 .add:disabled{opacity:.5}
 .need .v.no{color:var(--err);font-size:15px}
 
-/* Home: header + dashboard card stay pinned at the top while scrolling */
-body.home .topbar{position:sticky;top:0;z-index:12;background:var(--bg)}
-body.home .dash-pin{position:sticky;top:var(--tbh,72px);z-index:11;background:var(--bg);padding:2px 0 12px}
+/* Home: header scrolls away normally; only the dashboard card stays pinned at the top */
+body.home .dash-pin{position:sticky;top:0;z-index:11;background:var(--bg);padding:calc(6px + env(safe-area-inset-top)) 0 12px;margin-top:calc(-6px)}
 body.home .dash-pin .tool-card.compact{margin-bottom:0}
