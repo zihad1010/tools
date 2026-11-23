@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f2ec">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem("bupTheme")||"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <title>Cover Page Generator</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+</defs></svg>
+<div class="app">
+  <header class="topbar">
+    <a id="homeLink" class="icon-btn" href="index.html" aria-label="Home"><svg class="ic" aria-hidden="true"><use href="#i-home"/></svg></a>
+    <strong style="font-size:17px;font-weight:600">Cover Page Generator</strong>
+    <button id="themeToggle" class="icon-btn" aria-label="Switch light or dark mode"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
+  </header>
+
+  <nav class="pills" role="tablist" aria-label="Cover page type">
+    <button role="tab" id="t-assignment" aria-selected="true" data-type="assignment">Assignment</button>
+    <button role="tab" id="t-lab" aria-selected="false" data-type="lab">Lab Report</button>
+  </nav>
+
+  <section class="card" aria-live="polite">
+    <h3 id="cpTitle">Assignment cover page</h3>
+    <p class="hint">Fill in the details and get a ready-to-print PDF. Everything stays on your phone, nothing is uploaded.</p>
+    <div id="cpForm" class="cp-form"></div>
+    <button id="cpGo" class="btn" type="button">Generate PDF</button>
+    <button id="cpClear" class="btn ghost" type="button">Clear saved details</button>
+  </section>
+
+  <section id="cpDone" class="card hidden" aria-live="polite">
+    <h3>Your PDF is ready</h3>
+    <p class="hint" id="cpName"></p>
+    <a id="cpDl" class="btn" href="#" download>Download PDF</a>
+    <button id="cpShare" class="btn ghost" type="button">Open / Share</button>
+  </section>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="./vendor/pdf-lib.min.js"></script>
+<script src="./config.js"></script>
+<script src="./common.js"></script>
+<script src="./cover-pdf.js"></script>
+<script src="./cover.js"></script>
+</body>
+</html>
