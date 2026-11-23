@@ -12,8 +12,14 @@
     {
       "binding": "DB",
       "database_name": "student-tools-db",
-      // Replace with the id printed by: npx wrangler d1 create student-tools-db
       "database_id": "9b6c1057-9957-4200-af34-b54512b0aaca"
+    }
+  ],
+  "secrets_store_secrets": [
+    {
+      "binding": "SESSION_SECRET",
+      "store_id": "c2b9d6df9ee2438c9a3f0cdca1c21d88",
+      "secret_name": "SESSION_SECRET"
     }
   ]
 }
