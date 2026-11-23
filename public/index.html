@@ -10,7 +10,7 @@
   <title>Student Tools</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
-<body>
+<body class="home">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
 <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></symbol>
@@ -26,40 +26,42 @@
   </header>
   <main>
     <!-- My Dashboard (top, compact) -->
-    <a id="dashCard" class="tool-card alt compact" href="/dashboard/">
-      <div class="tool-art">
-        <svg viewBox="0 0 260 170" class="doodle" role="img" aria-label="Doodle of a dashboard with charts and a checklist">
-          <g class="bob">
-            <rect class="fill" x="38" y="22" width="184" height="128" rx="16"/>
-            <path class="thin" d="M38 48h184"/><circle cx="56" cy="35" r="3.5"/><circle cx="70" cy="35" r="3.5"/><circle cx="84" cy="35" r="3.5"/>
-            <rect class="fill2" x="56" y="106" width="16" height="30" rx="4"/>
-            <rect class="fill2" x="80" y="90" width="16" height="46" rx="4"/>
-            <rect class="fill2" x="104" y="98" width="16" height="38" rx="4"/>
-            <rect class="fill2" x="128" y="72" width="16" height="64" rx="4"/>
-            <path d="M56 84l26-16 22 8 36-26" />
-            <path d="M126 50h8v8" class="thin" transform="translate(10 -2)"/>
-            <circle class="fill2" cx="186" cy="84" r="20"/><path d="M186 84V64M186 84l15 10"/>
-            <path class="thin" d="M166 120h40M166 132h28"/>
-          </g>
-          <g class="bob2">
-            <path d="M222 14l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" class="thin"/>
-            <path d="M24 70c-6-10 4-18 10-12" class="thin"/>
-            <path class="fill2" d="M20 118l12-12 4 18z"/>
-          </g>
-          <path d="M232 112c8-10 14 8 22-2" class="thin"/>
-          <g class="spark" aria-hidden="true">
-            <g transform="translate(240 62)"><path class="sp s1" d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2z"/></g>
-            <g transform="translate(14 34)"><path class="sp s2" d="M0-6 1.5-1.5 6 0 1.5 1.5 0 6-1.5 1.5-6 0-1.5-1.5z"/></g>
-            <g transform="translate(150 10)"><path class="sp s3" d="M0-5 1.2-1.2 5 0 1.2 1.2 0 5-1.2 1.2-5 0-1.2-1.2z"/></g>
-            <g transform="translate(40 156)"><path class="sp s2" d="M0-5 1.2-1.2 5 0 1.2 1.2 0 5-1.2 1.2-5 0-1.2-1.2z"/></g>
-          </g>
-        </svg>
-      </div>
-      <div class="tool-body">
-        <div><h2>My Dashboard</h2><p>Your class &amp; progress at a glance</p></div>
-        <span class="tool-go"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span>
-      </div>
-    </a>
+    <div class="dash-pin">
+      <a id="dashCard" class="tool-card alt compact" href="/dashboard/">
+        <div class="tool-art">
+          <svg viewBox="0 0 260 170" class="doodle" role="img" aria-label="Doodle of a dashboard with charts and a checklist">
+            <g class="bob">
+              <rect class="fill" x="38" y="22" width="184" height="128" rx="16"/>
+              <path class="thin" d="M38 48h184"/><circle cx="56" cy="35" r="3.5"/><circle cx="70" cy="35" r="3.5"/><circle cx="84" cy="35" r="3.5"/>
+              <rect class="fill2" x="56" y="106" width="16" height="30" rx="4"/>
+              <rect class="fill2" x="80" y="90" width="16" height="46" rx="4"/>
+              <rect class="fill2" x="104" y="98" width="16" height="38" rx="4"/>
+              <rect class="fill2" x="128" y="72" width="16" height="64" rx="4"/>
+              <path d="M56 84l26-16 22 8 36-26" />
+              <path d="M126 50h8v8" class="thin" transform="translate(10 -2)"/>
+              <circle class="fill2" cx="186" cy="84" r="20"/><path d="M186 84V64M186 84l15 10"/>
+              <path class="thin" d="M166 120h40M166 132h28"/>
+            </g>
+            <g class="bob2">
+              <path d="M222 14l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" class="thin"/>
+              <path d="M24 70c-6-10 4-18 10-12" class="thin"/>
+              <path class="fill2" d="M20 118l12-12 4 18z"/>
+            </g>
+            <path d="M232 112c8-10 14 8 22-2" class="thin"/>
+            <g class="spark" aria-hidden="true">
+              <g transform="translate(240 62)"><path class="sp s1" d="M0-8 2-2 8 0 2 2 0 8-2 2-8 0-2-2z"/></g>
+              <g transform="translate(14 34)"><path class="sp s2" d="M0-6 1.5-1.5 6 0 1.5 1.5 0 6-1.5 1.5-6 0-1.5-1.5z"/></g>
+              <g transform="translate(150 10)"><path class="sp s3" d="M0-5 1.2-1.2 5 0 1.2 1.2 0 5-1.2 1.2-5 0-1.2-1.2z"/></g>
+              <g transform="translate(40 156)"><path class="sp s2" d="M0-5 1.2-1.2 5 0 1.2 1.2 0 5-1.2 1.2-5 0-1.2-1.2z"/></g>
+            </g>
+          </svg>
+        </div>
+        <div class="tool-body">
+          <div><h2>My Dashboard</h2><p>Your class &amp; progress at a glance</p></div>
+          <span class="tool-go"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+        </div>
+      </a>
+    </div>
 
     <h1 class="page-title">What do you need today?</h1>
     <p class="page-sub">Pick a tool to get started.</p>
@@ -178,6 +180,7 @@
   </div>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script>(function(){var h=document.querySelector(".topbar");function m(){if(h)document.documentElement.style.setProperty("--tbh",h.offsetHeight+"px")}m();addEventListener("resize",m);addEventListener("load",m);if(window.ResizeObserver&&h)new ResizeObserver(m).observe(h)})()</script>
 <script src="./config.js"></script>
 <script src="./common.js"></script>
 <script src="./auth.js"></script>
