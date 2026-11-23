@@ -19,7 +19,7 @@ h1,h2,h3,p{margin-top:0}
 .brand small{display:block;font-size:12px;color:var(--muted)}
 .icon-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;text-decoration:none;color:var(--ink)}
 .page-title{font-size:30px;font-weight:600;letter-spacing:-.03em;line-height:1.15;margin:14px 0 4px}
-.tool-card.compact+.page-title{margin-top:22px}
+.dash-pin+.page-title{margin-top:12px}
 .page-sub{color:var(--muted);font-size:14px;margin-bottom:0}
 
 /* ---------- Landing: tall tool cards ---------- */
@@ -171,3 +171,8 @@ main>.card:first-of-type{margin-top:20px}
 .save-st.err{color:var(--err)}
 .add:disabled{opacity:.5}
 .need .v.no{color:var(--err);font-size:15px}
+
+/* Home: header + dashboard card stay pinned at the top while scrolling */
+body.home .topbar{position:sticky;top:0;z-index:12;background:var(--bg)}
+body.home .dash-pin{position:sticky;top:var(--tbh,72px);z-index:11;background:var(--bg);padding:2px 0 12px}
+body.home .dash-pin .tool-card.compact{margin-bottom:0}
