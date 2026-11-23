@@ -22,7 +22,7 @@ h1,h2,h3,p{margin-top:0}
 .page-sub{color:var(--muted);font-size:14px;margin-bottom:0}
 
 /* ---------- Landing: tall tool cards ---------- */
-.tools{display:grid;gap:18px;margin-top:22px}
+.tools{display:grid;gap:14px;margin-top:20px}
 .tool-card{position:relative;display:flex;flex-direction:column;min-height:300px;border-radius:30px;background:var(--card);border:1px solid var(--line);overflow:hidden;text-decoration:none;color:var(--ink);transition:transform .18s,box-shadow .18s}
 .tool-card:active{transform:scale(.975)}
 .tool-art{flex:1;display:grid;place-items:center;background:var(--dbg);padding:18px 18px 6px;position:relative}
@@ -32,6 +32,20 @@ h1,h2,h3,p{margin-top:0}
 .tool-body h2{font-size:21px;font-weight:600;letter-spacing:-.02em;margin:0}
 .tool-body p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
 .tool-go{margin-left:auto;flex:0 0 auto;width:46px;height:46px;border-radius:50%;background:var(--black);color:#fff;display:grid;place-items:center}
+/* shorter cards */
+.tool-card.short{min-height:0}
+.tool-card.short .tool-art{padding:14px 18px 2px}
+.tool-card.short .tool-art svg{max-width:190px}
+.tool-card.short .tool-body{padding:12px 20px 16px}
+/* compact dashboard card: picture left, text right */
+.tool-card.compact{flex-direction:row;align-items:stretch;min-height:0}
+.tool-card.compact .tool-art{flex:0 0 40%;padding:10px 6px 10px 12px}
+.tool-card.compact .tool-art svg{max-width:128px}
+.tool-card.compact .tool-body{flex:1;min-width:0;padding:14px 16px 14px 8px;gap:10px}
+.tool-card.compact .tool-body>div{min-width:0}
+.tool-card.compact .tool-body h2{font-size:18px}
+.tool-card.compact .tool-body p{font-size:12.5px}
+.tool-card.compact .tool-go{width:40px;height:40px}
 .doodle{fill:none;stroke:var(--dink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
 .doodle .fill{fill:var(--dfill)}
 .doodle .fill2{fill:var(--dfill2)}
@@ -111,3 +125,12 @@ input::placeholder{color:var(--muted)}
 .key:active{background:var(--tint2)}
 .key.blank{visibility:hidden}
 @media (prefers-reduced-motion:reduce){.sheet,.shake{animation:none}}
+
+/* Cover Page Generator */
+textarea{width:100%;min-width:0;padding:11px 10px;border-radius:14px;border:1px solid var(--line);background:var(--sunk);font-size:15px;font-family:inherit;color:inherit;resize:none}
+textarea::placeholder{color:var(--muted)}
+.cp-form .field{margin-bottom:2px}
+.cp-form .grid2{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:6px}
+.cp-form input[type=date]{min-width:0;max-width:100%;display:block}
+.cp-bad{border-color:var(--err)!important}
+a.btn{text-align:center;text-decoration:none}
