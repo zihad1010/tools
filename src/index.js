@@ -18,6 +18,8 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS roster (student_id TEXT PRIMARY KEY)`,
   `CREATE TABLE IF NOT EXISTS ip_attempts (ip TEXT NOT NULL, ts INTEGER NOT NULL)`,
   `CREATE INDEX IF NOT EXISTS idx_ip ON ip_attempts (ip, ts)`,
+  `CREATE TABLE IF NOT EXISTS courses (id INTEGER PRIMARY KEY AUTOINCREMENT, student_id TEXT NOT NULL, position INTEGER NOT NULL DEFAULT 0, name TEXT NOT NULL DEFAULT '', credit REAL, parts TEXT NOT NULL DEFAULT '[]', updated_at TEXT NOT NULL DEFAULT (datetime('now')))`,
+  `CREATE INDEX IF NOT EXISTS idx_courses_student ON courses (student_id, position)`,
 ];
 let schemaReady = null;
 function ensureSchema(env) {
@@ -172,6 +174,53 @@ async function login(request, env, secret, ip) {
   return json({ error: `Wrong PIN. ${left} attempt${left === 1 ? "" : "s"} left.` }, 401);
 }
 
+// ---- Courses (marksheet data). Every query is scoped to the student_id of the verified session. ----
+const MAX_COURSES = 20, MAX_PARTS = 12, MAX_BODY = 100000;
+const cleanText = (v, max) => String(v ?? "").replace(/[\u0000-\u001f\u007f<>]/g, "").trim().replace(/\s+/g, " ").slice(0, max);
+// "" / null / undefined -> null, a valid number -> number, anything else -> NaN (rejected by the caller)
+function numOrNull(v) {
+  if (v === null || v === undefined || v === "") return null;
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) && n >= 0 && n <= 10000 ? n : NaN;
+}
+
+async function listCourses(env, id) {
+  const { results } = await env.DB.prepare(`SELECT name, credit, parts FROM courses WHERE student_id = ? ORDER BY position, id`).bind(id).all();
+  return (results || []).map((r) => {
+    let parts = [];
+    try { parts = JSON.parse(r.parts); } catch {}
+    return { name: r.name, credit: r.credit, parts: Array.isArray(parts) ? parts : [] };
+  });
+}
+
+async function saveCourses(request, env, id) {
+  const raw = await request.text();
+  if (raw.length > MAX_BODY) return json({ error: "Too much data." }, 413);
+  let b; try { b = JSON.parse(raw); } catch { b = null; }
+  if (!b || !Array.isArray(b.courses)) return json({ error: "Invalid data." }, 400);
+  if (b.courses.length > MAX_COURSES) return json({ error: `At most ${MAX_COURSES} courses.` }, 400);
+  const clean = [];
+  for (const c of b.courses) {
+    if (!c || typeof c !== "object" || !Array.isArray(c.parts) || c.parts.length > MAX_PARTS) return json({ error: "Invalid course." }, 400);
+    const credit = numOrNull(c.credit);
+    if (Number.isNaN(credit) || (credit !== null && credit > 30)) return json({ error: "Invalid credit." }, 400);
+    const parts = [];
+    for (const p of c.parts) {
+      if (!p || typeof p !== "object") return json({ error: "Invalid part." }, 400);
+      const g = numOrNull(p.g), o = numOrNull(p.o);
+      if (Number.isNaN(g) || Number.isNaN(o)) return json({ error: "Marks must be numbers from 0 to 10000." }, 400);
+      parts.push({ n: cleanText(p.n, 40), g, o });
+    }
+    clean.push({ name: cleanText(c.name, 60), credit, parts });
+  }
+  const stmts = [env.DB.prepare(`DELETE FROM courses WHERE student_id = ?`).bind(id)];
+  clean.forEach((c, i) => stmts.push(
+    env.DB.prepare(`INSERT INTO courses (student_id, position, name, credit, parts) VALUES (?, ?, ?, ?, ?)`).bind(id, i, c.name, c.credit, JSON.stringify(c.parts))
+  ));
+  await env.DB.batch(stmts); // one transaction: all or nothing
+  return json({ ok: true, courses: clean });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -203,6 +252,18 @@ export default {
       if (request.method === "GET" && path === "/api/me") {
         const sess = await getSession(request, env);
         return sess ? json({ ok: true, studentId: sess.id, nickname: sess.nick }) : json({ ok: false }, 401);
+      }
+
+      if (path === "/api/courses") {
+        const sess = await getSession(request, env);
+        if (!sess) return json({ error: "Locked." }, 401);
+        if (request.method === "GET") return json({ ok: true, courses: await listCourses(env, sess.id) });
+        if (request.method === "PUT") {
+          const origin = request.headers.get("Origin");
+          if (origin) { try { if (new URL(origin).host !== url.host) return json({ error: "Forbidden." }, 403); } catch { return json({ error: "Forbidden." }, 403); } }
+          return await saveCourses(request, env, sess.id);
+        }
+        return json({ error: "Method not allowed." }, 405, { Allow: "GET, PUT" });
       }
 
       if (request.method !== "POST") return json({ error: "Not found." }, 404);
