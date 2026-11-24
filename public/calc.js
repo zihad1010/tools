@@ -66,6 +66,44 @@
     $("cg-cr").textContent=f1(tc);
     $("cg-sem").textContent=f2(sem);
   }
+  /* ---------- A+ (CG 4.00) card ---------- */
+  var INK="#1a1033";
+  function panda(extra,mouth){
+    return '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" stroke="'+INK+'" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">'
+    +'<rect width="120" height="120" fill="#cdb2f7" stroke="none"/>'
+    +'<path d="M8 121Q12 96 40 90L80 90Q108 96 112 121Z" fill="#8a75d6"/>'
+    +'<circle cx="26" cy="30" r="13" fill="#5b3a9c"/><circle cx="94" cy="30" r="13" fill="#5b3a9c"/>'
+    +'<ellipse cx="60" cy="60" rx="40" ry="36" fill="#ece2fc"/>'
+    +'<ellipse cx="43" cy="60" rx="10" ry="8.5" fill="#5b3a9c" stroke="none" transform="rotate(-15 43 60)"/><ellipse cx="77" cy="60" rx="10" ry="8.5" fill="#5b3a9c" stroke="none" transform="rotate(15 77 60)"/>'
+    +'<path d="M34 93Q60 115 86 93" fill="none" stroke="#e9b82a" stroke-width="3.2" stroke-dasharray="3 2"/>'
+    +'<rect x="29" y="52" width="26" height="17" rx="7" fill="'+INK+'"/><rect x="65" y="52" width="26" height="17" rx="7" fill="'+INK+'"/>'
+    +'<path d="M55 57L65 57M29 56L20 51M91 56L100 51" fill="none" stroke-width="2.6"/>'
+    +'<path d="M33 59L38 55M69 59L74 55" fill="none" stroke="#fff" stroke-width="2" opacity=".4"/>'
+    +'<ellipse cx="60" cy="73" rx="6" ry="4" fill="#5b3a9c" stroke-width="1.6"/>'
+    +mouth+extra+'</svg>';
+  }
+  var DROP='fill="#a9dcff" stroke-width="1.6"';
+  var ART={
+    mid:panda('<path d="M103 40Q110 51 103 56Q96 51 103 40Z" '+DROP+'/>','<path d="M52 83Q60 87 68 83" fill="none"/>'),
+    hard:panda('<path d="M103 44Q109 53 103 58Q97 53 103 44Z" '+DROP+'/><path d="M17 50Q23 59 17 64Q11 59 17 50Z" '+DROP+'/><path d="M101 9L107 3M109 16L116 14M92 5L93 -1" fill="none" stroke-width="2"/>','<rect x="50" y="80" width="20" height="9" rx="3" fill="#fff"/><path d="M55 80V89M60 80V89M65 80V89" fill="none" stroke-width="1.6"/>'),
+    no:panda('<path d="M36 70Q32 82 36 98M84 70Q88 82 84 98" fill="none" stroke="#7fc6ff" stroke-width="4.5"/>','<path d="M50 89Q60 76 70 89Q60 84 50 89Z" fill="#3a1d66"/>')
+  };
+  var apState=-1;
+  function renderAp(req){
+    var box=$("ap");if(!box)return;
+    if(req==null||!isFinite(req)){box.hidden=true;apState=-1;return}
+    var rr=req>0?Math.ceil(Math.round(req*1e6)/1e4)/100:0,k,t,sub;
+    if(req>100){k=3;t="ভাই, CG 4.00 আর সম্ভব না…";sub="Final-এ ১০০-র বেশি লাগত"}
+    else if(rr>=90){k=2;t="ভাই, প্রায় perfect লাগবে!";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
+    else if(rr>=80){k=1;t="ভাই, একটু কষ্ট করলে হবে!";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
+    else if(req<=0){k=0;t="ভাই, CG 4.00 তো পাকা!";sub="Secured"}
+    else{k=0;t="ভাই, Easily CG 4.00 সম্ভব";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
+    if(k!==apState){
+      $("ap-art").innerHTML=k===0?'<img src="icons/panda.png" width="84" height="84" alt="">':(k===1?ART.mid:k===2?ART.hard:ART.no);
+      apState=k;
+    }
+    $("ap-t").textContent=t;$("ap-s").textContent=sub;box.hidden=false;
+  }
   function calcInc(){
     var g=0,o=0;
     S.inc.rows.forEach(function(r){var a=num(r.g),b=num(r.o);if(isFinite(a)&&b>0){g+=a;o+=b}});
@@ -73,10 +111,11 @@
     $("inc-out").textContent=o>0?f1(g)+" / "+f1(mx>0?mx:o):"--";
     $("inc-pct").textContent=(mx>0&&o>0)?f1(g/mx*100)+"%":"--";
     var hint=$("inc-hint"),body=$("need-body");body.innerHTML="";
-    if(!(mx>0&&fw>0)){hint.textContent="Set incourse full marks and final weight above.";return}
+    if(!(mx>0&&fw>0)){hint.textContent="Set incourse full marks and final weight above.";renderAp(null);return}
     var warn=(o>0&&Math.abs(o-mx)>0.001)?" Note: your parts add up to "+f1(o)+", not "+f1(mx)+".":"";
     hint.textContent="You have "+f1(g)+" / "+f1(mx)+" in incourse. Final /100 is converted to "+f1(fw)+"."+warn;
     var total=mx+fw;
+    renderAp(o>0?(minMark("A+")/100*total-g)*100/fw:null);
     GRADES.slice(0,9).forEach(function(gr){
       var t=minMark(gr[0])/100*total,req=(t-g)*100/fw,tr=document.createElement("tr"),cell;
       if(req<=0){cell='<span class="v ok">Secured</span>';tr.className="sure"}
