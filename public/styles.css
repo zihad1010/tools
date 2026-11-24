@@ -187,6 +187,11 @@ body.home .dash-pin .tool-card.compact{margin-bottom:0}
 .ap[data-k="1"]{--g1:#fdf0c4;--g2:#f4d57a;--ink:#5a4310;--f1:#fffdf5;--f2:#f8e29a}
 .ap[data-k="2"]{--g1:#ffe0cc;--g2:#ffb48a;--ink:#6b2d10;--f1:#fff8f3;--f2:#ffcfae}
 .ap[data-k="3"]{--g1:#ffd9e2;--g2:#f59fb6;--ink:#5e1a33;--f1:#fff6f8;--f2:#f8bccb}
+.ap[data-k="4"]{--g1:#eceefc;--g2:#c7cdf2;--ink:#383e78;--f1:#fbfbff;--f2:#d9ddf8}
+.ap[data-k="4"] .ap-txt strong{font-size:18.5px;line-height:1.2}
+.ap[data-k="4"] .ap-s{font-size:13px}
+.ap[data-k="4"] .doodle .sp{animation:apTw 2.6s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.ap[data-k="4"] .doodle .sp.s2{animation-delay:.9s}.ap[data-k="4"] .doodle .sp.s3{animation-delay:1.7s}
 .ap-art{flex:0 0 138px;width:138px;display:grid;place-items:center}
 .ap-art svg{width:138px;height:auto;display:block;overflow:visible}
 .ap .doodle{stroke:var(--ink)}
@@ -199,6 +204,8 @@ body.home .dash-pin .tool-card.compact{margin-bottom:0}
 .ap-tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.04em;background:var(--ink);color:#fff;border-radius:99px;padding:1px 9px;margin-bottom:5px}
 .ap-txt strong{font-size:22px;font-weight:700;color:var(--ink)}
 .ap-s{font-size:13.5px;font-weight:500;margin-top:5px;opacity:.8}
+@media (max-width:350px){.ap{gap:2px}.ap-art{flex-basis:112px;width:112px}.ap-art svg{width:112px}.ap-txt strong{font-size:19px}.ap[data-k="4"] .ap-txt strong{font-size:17px}}
+@keyframes apTw{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.7)}}
 @keyframes apIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes apShake{0%,100%{transform:translate(0,0)}25%{transform:translate(1px,-1px)}75%{transform:translate(-1px,1px)}}
-@media (prefers-reduced-motion:reduce){.ap,.ap .shake{animation:none}}
+@media (prefers-reduced-motion:reduce){.ap,.ap .shake,.ap .doodle .sp{animation:none!important}}
