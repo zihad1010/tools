@@ -209,3 +209,14 @@ body.home .dash-pin .tool-card.compact{margin-bottom:0}
 @keyframes apIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes apShake{0%,100%{transform:translate(0,0)}25%{transform:translate(1px,-1px)}75%{transform:translate(-1px,1px)}}
 @media (prefers-reduced-motion:reduce){.ap,.ap .shake,.ap .doodle .sp{animation:none!important}}
+
+/* ---------- Share button in the footer of the Calculator and Cover Page cards ---------- */
+.tool-wrap{position:relative}
+.tool-wrap .tool-body>div{padding-right:54px}
+.share-btn{position:absolute;z-index:2;right:20px;bottom:20px;width:42px;height:42px;border-radius:50%;border:0;background:var(--black);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .18s,opacity .18s}
+.share-btn .ic{width:19px;height:19px}
+.share-btn[hidden]{display:none}
+.share-btn:hover{opacity:.88}
+.share-btn:active{transform:scale(.92)}
+.share-btn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.share-btn{transition:none}}
