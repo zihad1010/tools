@@ -81,6 +81,9 @@
       mouth='<rect class="fill thin" x="83" y="77" width="17" height="9" rx="3"/><path class="thin" d="M88.500 77v9M94.500 77v9"/>';
       extra='<path '+DROP_P+' d="M128 38q7 10 0 15q-7-5 0-15z"/><path '+DROP_P+' d="M58 38q6 9 0 13q-6-4 0-13z"/><path class="thin" d="M122 18l6-7M132 26l9-3M112 10l1-9"/>';
       sp='<path class="sp s2" d="M16 108l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/><path class="thin" d="M126 124c7-9 14 9 21 0"/>';
+    }else if(k===4){
+      mouth='<path class="thin" d="M85 79q6 3 12 0"/>';
+      sp='<path d="M152 24l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/><path class="sp s2" d="M156 80l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/><path class="sp s3" d="M12 96l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/><path class="sp s2" d="M140 114l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path class="sp s3" d="M8 30l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path class="thin" d="M126 124c7-9 14 9 21 0"/>';
     }else{
       mouth='<path d="M84 86q7-10 14 0q-7-3-14 0z" style="fill:var(--ink)"/>';
       extra='<path class="thin" stroke="#3fa9f5" style="stroke-width:4" d="M74 72q-4 10 0 22M110 72q4 10 0 22"/>';
@@ -89,7 +92,7 @@
     var glass=
       '<g class="'+(k===2?"shake":"")+'">'
       +'<path class="fill" d="M24 20h24c0 16-4 27-12 29-8-2-12-13-12-29z"/>'
-      +(wine?'<path d="M25.500 30h21c-1 10-4 16-10.500 18-6.500-2-9.500-8-10.500-18z" fill="#c2415f" stroke="none"/>':'')
+      +(wine?'<path d="M25.500 30h21c-1 10-4 16-10.500 18-6.500-2-9.500-8-10.500-18z" fill="#c2415f" stroke="none"/>':k===4?'<path d="M25.500 30h21c-1 10-4 16-10.500 18-6.500-2-9.500-8-10.500-18z" fill="#8f98e3" stroke="none"/>':'')
       +'<path d="M36 49v18M27 68h18"/>'
       +'<circle class="fill" cx="36" cy="62" r="7.500"/></g>';
     return '<svg viewBox="0 0 170 140" class="doodle" aria-hidden="true">'
@@ -112,13 +115,16 @@
   var apState=-1;
   function renderAp(req){
     var box=$("ap");if(!box)return;
-    if(req==null||!isFinite(req)){box.hidden=true;apState=-1;return}
-    var rr=req>0?Math.ceil(Math.round(req*1e6)/1e4)/100:0,k,t,sub;
+    var rr=0,k,t,sub;
+    if(req==null||!isFinite(req)){k=4;t="ভাই, marks দিন, দেখি CG 4.00 হয় কিনা";sub="Incourse marks লিখলেই বলে দেব"}
+    else{
+    rr=req>0?Math.ceil(Math.round(req*1e6)/1e4)/100:0;
     if(req>100){k=3;t="ভাই, CG 4.00 আর সম্ভব না…";sub="Final-এ ১০০-র বেশি লাগত"}
     else if(rr>=90){k=2;t="ভাই, প্রায় perfect লাগবে!";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
     else if(rr>=80){k=1;t="ভাই, একটু কষ্ট করলে হবে!";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
     else if(req<=0){k=0;t="ভাই, CG 4.00 তো পাকা!";sub="Secured"}
     else{k=0;t="ভাই, Easily CG 4.00 সম্ভব";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
+    }
     if(k!==apState){$("ap-art").innerHTML=cat(k);box.dataset.k=k;apState=k}
     $("ap-t").textContent=t;$("ap-s").textContent=sub;box.hidden=false;
   }
@@ -133,7 +139,7 @@
     var warn=(o>0&&Math.abs(o-mx)>0.001)?" Note: your parts add up to "+f1(o)+", not "+f1(mx)+".":"";
     hint.textContent="You have "+f1(g)+" / "+f1(mx)+" in incourse. Final /100 is converted to "+f1(fw)+"."+warn;
     var total=mx+fw;
-    renderAp(o>0?(minMark("A+")/100*total-g)*100/fw:null);
+    renderAp(o>0&&g>0?(minMark("A+")/100*total-g)*100/fw:null);
     GRADES.slice(0,9).forEach(function(gr){
       var t=minMark(gr[0])/100*total,req=(t-g)*100/fw,tr=document.createElement("tr"),cell;
       if(req<=0){cell='<span class="v ok">Secured</span>';tr.className="sure"}
