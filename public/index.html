@@ -13,8 +13,8 @@
 <body class="home">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="19" r="2.6"/><path d="M8.3 10.8l7.4-4.4M8.3 13.2l7.4 4.4"/></symbol>
 <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></symbol>
-<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 17 17 7M8 7h9v9"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
 <symbol id="i-back" viewBox="0 0 24 24"><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1zM17 9l-5 6M12 9l5 6"/></symbol>
 <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
@@ -58,7 +58,6 @@
         </div>
         <div class="tool-body">
           <div><h2>My Dashboard</h2><p>Your class &amp; progress at a glance</p></div>
-          <span class="tool-go"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span>
         </div>
       </a>
     </div>
@@ -68,68 +67,72 @@
 
     <div class="tools">
       <!-- Card 2: CG Calculator -->
-      <a id="calcCard" class="tool-card short" href="calculator.html" target="_blank" rel="noopener">
-        <div class="tool-art">
-          <svg viewBox="0 0 260 170" class="doodle" role="img" aria-label="Doodle of a calculator with a pencil and stars">
-            <g class="bob">
-              <rect class="fill" x="82" y="14" width="96" height="140" rx="16" transform="rotate(-4 130 84)"/>
-              <rect class="fill2" x="94" y="28" width="72" height="30" rx="8" transform="rotate(-4 130 84)"/>
-              <path class="thin" d="M104 46c8-1 12 1 18 0M138 44l14-1" transform="rotate(-4 130 84)"/>
-              <g transform="rotate(-4 130 84)">
-                <circle cx="104" cy="82" r="7"/><circle cx="130" cy="82" r="7"/><circle cx="156" cy="82" r="7"/>
-                <circle cx="104" cy="106" r="7"/><circle cx="130" cy="106" r="7"/><circle cx="156" cy="106" r="7"/>
-                <circle cx="104" cy="130" r="7"/><circle cx="130" cy="130" r="7"/><rect class="fill2" x="146" y="120" width="20" height="20" rx="8"/>
+      <div class="tool-wrap">
+        <a id="calcCard" class="tool-card short" href="calculator.html" target="_blank" rel="noopener">
+          <div class="tool-art">
+            <svg viewBox="0 0 260 170" class="doodle" role="img" aria-label="Doodle of a calculator with a pencil and stars">
+              <g class="bob">
+                <rect class="fill" x="82" y="14" width="96" height="140" rx="16" transform="rotate(-4 130 84)"/>
+                <rect class="fill2" x="94" y="28" width="72" height="30" rx="8" transform="rotate(-4 130 84)"/>
+                <path class="thin" d="M104 46c8-1 12 1 18 0M138 44l14-1" transform="rotate(-4 130 84)"/>
+                <g transform="rotate(-4 130 84)">
+                  <circle cx="104" cy="82" r="7"/><circle cx="130" cy="82" r="7"/><circle cx="156" cy="82" r="7"/>
+                  <circle cx="104" cy="106" r="7"/><circle cx="130" cy="106" r="7"/><circle cx="156" cy="106" r="7"/>
+                  <circle cx="104" cy="130" r="7"/><circle cx="130" cy="130" r="7"/><rect class="fill2" x="146" y="120" width="20" height="20" rx="8"/>
+                </g>
               </g>
-            </g>
-            <g class="bob2">
-              <path d="M200 30l30 30-8 22-22-8-30-30z" class="fill2" transform="rotate(18 215 55)"/>
-              <path class="thin" d="M205 62l8 8" transform="rotate(18 215 55)"/>
-            </g>
-            <path d="M48 40l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/>
-            <path d="M214 124l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" class="thin"/>
-            <path class="thin" d="M28 120c10-12 20 12 30 0s20 12 30 0"/>
-            <circle cx="36" cy="82" r="4" class="thin"/>
-          </svg>
-        </div>
-        <div class="tool-body">
-          <div><h2>CG Calculator</h2><p>Total CG, Incourse, CT &amp; Mid</p></div>
-          <span class="tool-go"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span>
-        </div>
-      </a>
+              <g class="bob2">
+                <path d="M200 30l30 30-8 22-22-8-30-30z" class="fill2" transform="rotate(18 215 55)"/>
+                <path class="thin" d="M205 62l8 8" transform="rotate(18 215 55)"/>
+              </g>
+              <path d="M48 40l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/>
+              <path d="M214 124l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" class="thin"/>
+              <path class="thin" d="M28 120c10-12 20 12 30 0s20 12 30 0"/>
+              <circle cx="36" cy="82" r="4" class="thin"/>
+            </svg>
+          </div>
+          <div class="tool-body">
+            <div><h2>CG Calculator</h2><p>Total CG, Incourse, CT &amp; Mid</p></div>
+          </div>
+        </a>
+        <button type="button" class="share-btn" data-share="calcCard" data-title="CG Calculator" aria-label="Share CG Calculator or copy its link"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg></button>
+      </div>
 
       <!-- Card 3: Cover Page Generator -->
-      <a id="coverCard" class="tool-card short blue" href="#">
-        <div class="tool-art">
-          <svg viewBox="0 0 260 170" class="doodle" role="img" aria-label="Doodle of a cover page with a logo, title lines and a pencil">
-            <g class="bob">
-              <rect class="fill" x="86" y="10" width="88" height="148" rx="10" transform="rotate(3 130 84)"/>
-              <g transform="rotate(3 130 84)">
-                <circle class="fill2" cx="130" cy="38" r="12"/>
-                <path class="thin" d="M125 38l4 4 7-8"/>
-                <path d="M108 68h44"/>
-                <path class="thin" d="M114 80h32M118 90h24"/>
-                <path class="thin" d="M104 116h22M134 116h22M104 130h22M134 130h22"/>
-                <path class="thin" d="M104 144h52"/>
+      <div class="tool-wrap">
+        <a id="coverCard" class="tool-card short blue" href="#">
+          <div class="tool-art">
+            <svg viewBox="0 0 260 170" class="doodle" role="img" aria-label="Doodle of a cover page with a logo, title lines and a pencil">
+              <g class="bob">
+                <rect class="fill" x="86" y="10" width="88" height="148" rx="10" transform="rotate(3 130 84)"/>
+                <g transform="rotate(3 130 84)">
+                  <circle class="fill2" cx="130" cy="38" r="12"/>
+                  <path class="thin" d="M125 38l4 4 7-8"/>
+                  <path d="M108 68h44"/>
+                  <path class="thin" d="M114 80h32M118 90h24"/>
+                  <path class="thin" d="M104 116h22M134 116h22M104 130h22M134 130h22"/>
+                  <path class="thin" d="M104 144h52"/>
+                </g>
               </g>
-            </g>
-            <g class="bob2">
-              <g transform="rotate(38 212 100)">
-                <rect class="fill2" x="204" y="66" width="16" height="58" rx="3"/>
-                <path class="fill" d="M204 124l8 15 8-15z"/>
-                <path class="thin" d="M204 78h16"/>
+              <g class="bob2">
+                <g transform="rotate(38 212 100)">
+                  <rect class="fill2" x="204" y="66" width="16" height="58" rx="3"/>
+                  <path class="fill" d="M204 124l8 15 8-15z"/>
+                  <path class="thin" d="M204 78h16"/>
+                </g>
               </g>
-            </g>
-            <path d="M46 44l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/>
-            <path d="M226 28l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" class="thin"/>
-            <path class="thin" d="M24 118c10-12 20 12 30 0s20 12 30 0"/>
-            <circle cx="40" cy="92" r="4" class="thin"/>
-          </svg>
-        </div>
-        <div class="tool-body">
-          <div><h2>Cover Page Generator</h2><p>Assignment &amp; lab cover pages</p></div>
-          <span class="tool-go"><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></span>
-        </div>
-      </a>
+              <path d="M46 44l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/>
+              <path d="M226 28l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" class="thin"/>
+              <path class="thin" d="M24 118c10-12 20 12 30 0s20 12 30 0"/>
+              <circle cx="40" cy="92" r="4" class="thin"/>
+            </svg>
+          </div>
+          <div class="tool-body">
+            <div><h2>Cover Page Generator</h2><p>Assignment &amp; lab cover pages</p></div>
+          </div>
+        </a>
+        <button type="button" class="share-btn" data-share="coverCard" data-title="Cover Page Generator" aria-label="Share Cover Page Generator or copy its link"><svg class="ic" aria-hidden="true"><use href="#i-share"/></svg></button>
+      </div>
     </div>
   </main>
 </div>
@@ -183,5 +186,6 @@
 <script src="./config.js"></script>
 <script src="./common.js"></script>
 <script src="./auth.js"></script>
+<script src="./share.js"></script>
 </body>
 </html>
