@@ -66,28 +66,49 @@
     $("cg-cr").textContent=f1(tc);
     $("cg-sem").textContent=f2(sem);
   }
-  /* ---------- A+ (CG 4.00) card ---------- */
-  var INK="#1a1033";
-  function panda(extra,mouth){
-    return '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" stroke="'+INK+'" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">'
-    +'<rect width="120" height="120" fill="#cdb2f7" stroke="none"/>'
-    +'<path d="M8 121Q12 96 40 90L80 90Q108 96 112 121Z" fill="#8a75d6"/>'
-    +'<circle cx="26" cy="30" r="13" fill="#5b3a9c"/><circle cx="94" cy="30" r="13" fill="#5b3a9c"/>'
-    +'<ellipse cx="60" cy="60" rx="40" ry="36" fill="#ece2fc"/>'
-    +'<ellipse cx="43" cy="60" rx="10" ry="8.5" fill="#5b3a9c" stroke="none" transform="rotate(-15 43 60)"/><ellipse cx="77" cy="60" rx="10" ry="8.5" fill="#5b3a9c" stroke="none" transform="rotate(15 77 60)"/>'
-    +'<path d="M34 93Q60 115 86 93" fill="none" stroke="#e9b82a" stroke-width="3.2" stroke-dasharray="3 2"/>'
-    +'<rect x="29" y="52" width="26" height="17" rx="7" fill="'+INK+'"/><rect x="65" y="52" width="26" height="17" rx="7" fill="'+INK+'"/>'
-    +'<path d="M55 57L65 57M29 56L20 51M91 56L100 51" fill="none" stroke-width="2.6"/>'
-    +'<path d="M33 59L38 55M69 59L74 55" fill="none" stroke="#fff" stroke-width="2" opacity=".4"/>'
-    +'<ellipse cx="60" cy="73" rx="6" ry="4" fill="#5b3a9c" stroke-width="1.6"/>'
-    +mouth+extra+'</svg>';
+  /* ---------- A+ (CG 4.00) card: doodle cat, same doodle style as the home cards ---------- */
+  var DROP_P='class="tear thin"';
+  function cat(k){
+    var mouth,extra="",wine=k<3,sp="";
+    if(k===0){
+      mouth='<path class="thin" d="M85 78q6 5 12 0"/>';
+      sp='<path d="M150 22l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/><path class="sp" d="M20 104l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/><path class="sp s2" d="M140 100l2.500 6 6 2.500-6 2.500-2.500 6-2.500-6-6-2.500 6-2.500z"/><path class="thin" d="M126 124c7-9 14 9 21 0"/>';
+    }else if(k===1){
+      mouth='<path class="thin" d="M86 80h11"/>';
+      extra='<path '+DROP_P+' d="M128 34q7 10 0 15q-7-5 0-15z"/>';
+      sp='<path d="M150 74l3 8 8 3-8 3-3 8-3-8-8-3 8-3z"/><path class="sp s3" d="M16 108l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/><path class="thin" d="M126 124c7-9 14 9 21 0"/>';
+    }else if(k===2){
+      mouth='<rect class="fill thin" x="83" y="77" width="17" height="9" rx="3"/><path class="thin" d="M88.500 77v9M94.500 77v9"/>';
+      extra='<path '+DROP_P+' d="M128 38q7 10 0 15q-7-5 0-15z"/><path '+DROP_P+' d="M58 38q6 9 0 13q-6-4 0-13z"/><path class="thin" d="M122 18l6-7M132 26l9-3M112 10l1-9"/>';
+      sp='<path class="sp s2" d="M16 108l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/><path class="thin" d="M126 124c7-9 14 9 21 0"/>';
+    }else{
+      mouth='<path d="M84 86q7-10 14 0q-7-3-14 0z" style="fill:var(--ink)"/>';
+      extra='<path class="thin" stroke="#3fa9f5" style="stroke-width:4" d="M74 72q-4 10 0 22M110 72q4 10 0 22"/>';
+      sp='<path class="thin" d="M128 30l-4 8M138 36l-4 8M148 30l-4 8"/><path class="thin" d="M126 124c7 9 14-9 21 0"/>';
+    }
+    var glass=
+      '<g class="'+(k===2?"shake":"")+'">'
+      +'<path class="fill" d="M24 20h24c0 16-4 27-12 29-8-2-12-13-12-29z"/>'
+      +(wine?'<path d="M25.500 30h21c-1 10-4 16-10.500 18-6.500-2-9.500-8-10.500-18z" fill="#c2415f" stroke="none"/>':'')
+      +'<path d="M36 49v18M27 68h18"/>'
+      +'<circle class="fill" cx="36" cy="62" r="7.500"/></g>';
+    return '<svg viewBox="0 0 170 140" class="doodle" aria-hidden="true">'
+      +'<g class="bob">'
+      +'<path class="fill" d="M64 128c-12-16-8-38 8-46h42c16 8 22 30 14 46z"/>'
+      +'<path fill="none" stroke="var(--ink)" stroke-width="14" d="M72 100Q50 98 38 66"/><path fill="none" style="stroke:var(--f1)" stroke-width="8" d="M72 100Q50 98 38 66"/>'
+      +'<path class="fill" d="M62 52L58 24l24 14z"/><path class="fill" d="M102 38l24-14-2 30z"/>'
+      +'<path class="fill2 thin" d="M63 44l-2-12 11 6z"/><path class="fill2 thin" d="M108 39l11-7-1 12z"/>'
+      +'<ellipse class="fill" cx="92" cy="64" rx="36" ry="29"/>'
+      +'<rect x="67" y="56" width="22" height="15" rx="6" style="fill:var(--ink)"/><rect x="95" y="56" width="22" height="15" rx="6" style="fill:var(--ink)"/>'
+      +'<path class="thin" d="M89 60h6M117 59l13-3"/>'
+      +'<path d="M72 61l4-3M100 61l4-3" stroke="#fff" stroke-width="2" opacity=".55"/>'
+      +'<circle cx="91" cy="75" r="1.800" style="fill:var(--ink);stroke:none"/>'
+      +mouth
+      +'<ellipse class="fill" cx="98" cy="124" rx="12" ry="7"/><path class="thin" d="M94 120v4M99 120v4"/>'
+      +glass
+      +extra
+      +'</g>'+sp+'</svg>';
   }
-  var DROP='fill="#a9dcff" stroke-width="1.6"';
-  var ART={
-    mid:panda('<path d="M103 40Q110 51 103 56Q96 51 103 40Z" '+DROP+'/>','<path d="M52 83Q60 87 68 83" fill="none"/>'),
-    hard:panda('<path d="M103 44Q109 53 103 58Q97 53 103 44Z" '+DROP+'/><path d="M17 50Q23 59 17 64Q11 59 17 50Z" '+DROP+'/><path d="M101 9L107 3M109 16L116 14M92 5L93 -1" fill="none" stroke-width="2"/>','<rect x="50" y="80" width="20" height="9" rx="3" fill="#fff"/><path d="M55 80V89M60 80V89M65 80V89" fill="none" stroke-width="1.6"/>'),
-    no:panda('<path d="M36 70Q32 82 36 98M84 70Q88 82 84 98" fill="none" stroke="#7fc6ff" stroke-width="4.5"/>','<path d="M50 89Q60 76 70 89Q60 84 50 89Z" fill="#3a1d66"/>')
-  };
   var apState=-1;
   function renderAp(req){
     var box=$("ap");if(!box)return;
@@ -98,10 +119,7 @@
     else if(rr>=80){k=1;t="ভাই, একটু কষ্ট করলে হবে!";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
     else if(req<=0){k=0;t="ভাই, CG 4.00 তো পাকা!";sub="Secured"}
     else{k=0;t="ভাই, Easily CG 4.00 সম্ভব";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
-    if(k!==apState){
-      $("ap-art").innerHTML=k===0?'<img src="icons/panda.png" width="84" height="84" alt="">':(k===1?ART.mid:k===2?ART.hard:ART.no);
-      apState=k;
-    }
+    if(k!==apState){$("ap-art").innerHTML=cat(k);box.dataset.k=k;apState=k}
     $("ap-t").textContent=t;$("ap-s").textContent=sub;box.hidden=false;
   }
   function calcInc(){
