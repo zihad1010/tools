@@ -176,14 +176,29 @@ main>.card:first-of-type{margin-top:20px}
 body.home .dash-pin{position:sticky;top:0;z-index:11;background:var(--bg);padding:calc(6px + env(safe-area-inset-top)) 0 12px;margin-top:calc(-6px)}
 body.home .dash-pin .tool-card.compact{margin-bottom:0}
 
-/* ---- A+ (CG 4.00) status card in Incourse tab ---- */
-.ap{display:flex;align-items:center;gap:10px;background:#cdb2f7;border:2px solid #2a1a4d;border-radius:24px;padding:6px 16px 6px 6px;margin-bottom:14px;color:#2b1659;font-family:"Atma","Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;animation:apIn .35s ease}
+/* ---- A+ (CG 4.00) status card in Incourse tab (same height as the blue result card) ---- */
+.ap{--g1:#d8f3dc;--g2:#a8e0b4;--ink:#1d4a38;--f1:#fbfaf6;--f2:#bfe8c7;--dsp:#fff;
+  display:flex;align-items:center;gap:6px;height:141px;box-sizing:border-box;overflow:hidden;
+  padding:6px 16px 6px 6px;margin-bottom:14px;border-radius:26px;color:var(--ink);
+  background:radial-gradient(circle at 14% 12%,rgba(255,255,255,.6),transparent 55%),linear-gradient(145deg,var(--g1),var(--g2));
+  box-shadow:0 10px 26px rgba(15,37,48,.14);
+  font-family:"Atma","Hind Siliguri","Noto Sans Bengali",system-ui,sans-serif;animation:apIn .35s ease}
 .ap[hidden]{display:none}
-.ap-art{flex:0 0 84px;width:84px;height:84px;border-radius:18px;overflow:hidden}
-.ap-art img,.ap-art svg{display:block;width:84px;height:84px}
-.ap-txt{display:flex;flex-direction:column;min-width:0;line-height:1.2}
-.ap-tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.04em;background:#2a1a4d;color:#efe4ff;border-radius:99px;padding:1px 9px;margin-bottom:4px}
-.ap-txt strong{font-size:19px;font-weight:700;color:#2b1659}
-.ap-s{font-size:13px;font-weight:500;color:#5a3d99;margin-top:2px}
+.ap[data-k="1"]{--g1:#fdf0c4;--g2:#f4d57a;--ink:#5a4310;--f1:#fffdf5;--f2:#f8e29a}
+.ap[data-k="2"]{--g1:#ffe0cc;--g2:#ffb48a;--ink:#6b2d10;--f1:#fff8f3;--f2:#ffcfae}
+.ap[data-k="3"]{--g1:#ffd9e2;--g2:#f59fb6;--ink:#5e1a33;--f1:#fff6f8;--f2:#f8bccb}
+.ap-art{flex:0 0 138px;width:138px;display:grid;place-items:center}
+.ap-art svg{width:138px;height:auto;display:block;overflow:visible}
+.ap .doodle{stroke:var(--ink)}
+.ap .doodle .fill{fill:var(--f1)}
+.ap .doodle .fill2{fill:var(--f2)}
+.ap .doodle .sp{fill:var(--dsp);stroke:none}
+.ap .doodle .tear{fill:#bfe6ff;stroke:var(--ink)}
+.ap .shake{animation:apShake .3s linear infinite}
+.ap-txt{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.ap-tag{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:.04em;background:var(--ink);color:#fff;border-radius:99px;padding:1px 9px;margin-bottom:5px}
+.ap-txt strong{font-size:22px;font-weight:700;color:var(--ink)}
+.ap-s{font-size:13.5px;font-weight:500;margin-top:5px;opacity:.8}
 @keyframes apIn{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.ap{animation:none}}
+@keyframes apShake{0%,100%{transform:translate(0,0)}25%{transform:translate(1px,-1px)}75%{transform:translate(-1px,1px)}}
+@media (prefers-reduced-motion:reduce){.ap,.ap .shake{animation:none}}
