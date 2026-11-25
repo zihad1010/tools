@@ -46,3 +46,8 @@ npx wrangler d1 execute student-tools-db --remote --command "DELETE FROM student
 ## Connecting your own dashboard
 
 Put the dashboard files in `public/dashboard/` (replace the placeholder `index.html`) and they are protected automatically. If you set `dashboardUrl` in `public/config.js` to an outside website instead, the PIN is only checked on this site; the other site must do its own check.
+
+## Course list (Department -> Semester -> Courses)
+
+`public/courses.js` holds every course name and credit (ICT, 1st to 8th semester). Pick a department and semester and the courses fill in by themselves in the CG Calculator (Total CG tab), the Marksheet dashboard and the Cover Page Generator. Names and credits are locked.
+To add another department, copy the `ICE` block inside `courses.js`. Keep the same file in the ClassRoom project too.
