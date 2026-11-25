@@ -50,8 +50,16 @@
       </div>
     </div>
     <div class="card">
+      <h3>Department &amp; semester</h3>
+      <p class="hint">Pick them and the courses with their credits fill in by themselves. Then just choose your grades.</p>
+      <div class="grid2">
+        <div class="field"><label for="cg-dep">Department</label><select id="cg-dep"></select></div>
+        <div class="field"><label for="cg-semsel">Semester</label><select id="cg-semsel"></select></div>
+      </div>
+    </div>
+    <div class="card">
       <h3>Courses</h3>
-      <p class="hint">Course name, credit and grade.</p>
+      <p class="hint" id="cg-hint">Course name, credit and grade.</p>
       <div id="cg-rows"></div>
       <button class="add" data-add="cg">+ Add course</button>
     </div>
@@ -137,6 +145,7 @@
 </div>
 <script src="./config.js"></script>
 <script src="./common.js"></script>
+<script src="./courses.js"></script>
 <script src="./calc.js"></script>
 </body>
 </html>
