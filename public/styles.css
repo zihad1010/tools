@@ -220,3 +220,14 @@ body.home .dash-pin .tool-card.compact{margin-bottom:0}
 .share-btn:active{transform:scale(.92)}
 .share-btn:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.share-btn{transition:none}}
+
+/* Cover page chooser: two cover-like cards */
+.cp-cards{grid-template-columns:1fr 1fr;align-items:stretch}
+.cp-card{min-height:0;width:100%;padding:0;font:inherit;text-align:left;cursor:pointer}
+.cp-card .tool-art{padding:14px 10px 0}
+.cp-card .tool-art svg{max-width:150px}
+.cp-card .tool-body{padding:10px 14px 16px;align-items:flex-start}
+.cp-card .tool-body h2{font-size:18px}
+.cp-card .tool-body p{font-size:12.5px}
+.cp-back{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 16px;font-weight:600;font-size:14px;margin:6px 0 10px}
+@media(max-width:340px){.cp-cards{grid-template-columns:1fr}}
