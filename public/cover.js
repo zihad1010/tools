@@ -46,13 +46,35 @@
   function collect() {
     TYPES[cur].fields.forEach(function (f) { var el = $("f-" + f.k); if (el) vals[f.k] = el.value; });
   }
+  /* Course titles for the chosen department + semester (lab report -> lab courses, assignment -> theory courses) */
+  function courseOptions() {
+    var st = BUPC.saved();
+    if (!st.dep || !st.sem) return null;
+    return BUPC.pickable(st.dep, st.sem).filter(function (c) { return c.lab === (cur === "lab"); });
+  }
   function render() {
     var t = TYPES[cur];
     $("cpTitle").textContent = t.title + " cover page";
-    var h = '<div class="grid2">';
+    var h = '<div class="grid2"><div class="field"><label for="cp-dep">Department</label><select id="cp-dep"></select></div>'
+      + '<div class="field"><label for="cp-sem">Semester</label><select id="cp-sem"></select></div>';
+    var opts = courseOptions();
     t.fields.forEach(function (f) {
       var id = "f-" + f.k, v = esc(vals[f.k] || ""), span = f.full ? ' style="grid-column:1/-1"' : "";
-      var input = f.area
+      var input;
+      if (f.k === "course") {
+        if (!opts) input = '<select id="' + id + '" disabled><option value="">Choose department and semester first</option></select>';
+        else if (!opts.length) input = '<select id="' + id + '" disabled><option value="">No ' + (cur === "lab" ? "lab" : "theory") + ' courses in this semester</option></select>';
+        else input = '<select id="' + id + '"><option value="">Choose course</option>' + opts.map(function (c) {
+          return '<option value="' + esc(c.name) + '"' + (vals.course === c.name ? " selected" : "") + ">" + esc(c.name) + "</option>";
+        }).join("") + "</select>";
+        h += '<div class="field"' + span + '><label for="' + id + '">' + esc(f.l) + "</label>" + input + "</div>";
+        return;
+      }
+      if (f.k === "semester" && opts) {
+        h += '<div class="field"' + span + '><label for="' + id + '">' + esc(f.l) + '</label><input id="' + id + '" readonly value="' + v + '"></div>';
+        return;
+      }
+      input = f.area
         ? '<textarea id="' + id + '" rows="2" maxlength="' + f.max + '" placeholder="' + esc(f.p || "") + '">' + v + "</textarea>"
         : f.t === "date"
           ? '<input id="' + id + '" type="date" value="' + v + '">'
@@ -60,16 +82,29 @@
       h += '<div class="field"' + span + '><label for="' + id + '">' + esc(f.l) + "</label>" + input + "</div>";
     });
     $("cpForm").innerHTML = h + "</div>";
+    BUPC.mount($("cp-dep"), $("cp-sem"), function (d, n) {
+      collect(); vals.course = ""; vals.semester = n ? BUPC.label(d, n) : ""; hideDone(); render();
+    });
     $("cpForm").querySelectorAll("input,textarea").forEach(function (el) {
       el.addEventListener("input", function () { el.classList.remove("cp-bad"); });
     });
   }
   function hideDone() { $("cpDone").classList.add("hidden"); }
-  function setType(t) {
-    if (t === cur) return;
-    collect(); cur = t; hideDone();
-    document.querySelectorAll(".pills button").forEach(function (b) { b.setAttribute("aria-selected", b.dataset.type === t ? "true" : "false"); });
-    render();
+  var formOpen = false;
+  function openType(t) {
+    if (formOpen) collect();
+    cur = t; hideDone(); render();
+    formOpen = true;
+    $("cpPick").classList.add("hidden"); $("cpFormWrap").classList.remove("hidden");
+    window.scrollTo(0, 0);
+    if (location.hash !== "#" + t) history.replaceState(null, "", "#" + t);
+  }
+  function closeType() {
+    if (formOpen) collect();
+    formOpen = false; hideDone();
+    $("cpFormWrap").classList.add("hidden"); $("cpPick").classList.remove("hidden");
+    window.scrollTo(0, 0);
+    history.replaceState(null, "", location.pathname + location.search);
   }
 
   function safe(s) { return String(s || "").replace(/[^A-Za-z0-9_-]+/g, "").slice(0, 24); }
@@ -119,7 +154,8 @@
   }
 
   var hl = $("homeLink"); if (S.homeUrl) hl.href = S.homeUrl;
-  document.querySelectorAll(".pills button").forEach(function (b) { b.addEventListener("click", function () { setType(b.dataset.type); }); });
+  document.querySelectorAll(".cp-card").forEach(function (b) { b.addEventListener("click", function () { openType(b.dataset.type); }); });
+  $("cpBack").addEventListener("click", closeType);
   $("cpGo").addEventListener("click", generate);
   $("cpShare").addEventListener("click", share);
   $("cpClear").addEventListener("click", function () {
@@ -127,5 +163,8 @@
     SAVED.forEach(function (k) { vals[k] = ""; var el = $("f-" + k); if (el) el.value = ""; });
     if (window.toast) window.toast("Saved details cleared.");
   });
-  load(); render();
+  load();
+  (function () { var st = BUPC.saved(); if (st.dep && st.sem) vals.semester = BUPC.label(st.dep, st.sem); })();
+  var want = (location.hash || "").slice(1);
+  if (TYPES[want]) openType(want); // cover.html#lab or #assignment opens that form directly
 })();
