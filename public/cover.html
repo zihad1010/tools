@@ -24,30 +24,89 @@
     <button id="themeToggle" class="icon-btn" aria-label="Switch light or dark mode"><svg class="ic" aria-hidden="true"><use href="#i-moon"/></svg></button>
   </header>
 
-  <nav class="pills" role="tablist" aria-label="Cover page type">
-    <button role="tab" id="t-assignment" aria-selected="true" data-type="assignment">Assignment</button>
-    <button role="tab" id="t-lab" aria-selected="false" data-type="lab">Lab Report</button>
-  </nav>
-
-  <section class="card" aria-live="polite">
-    <h3 id="cpTitle">Assignment cover page</h3>
-    <p class="hint">Fill in the details and get a ready-to-print PDF. Everything stays on your phone, nothing is uploaded.</p>
-    <div id="cpForm" class="cp-form"></div>
-    <button id="cpGo" class="btn" type="button">Generate PDF</button>
-    <button id="cpClear" class="btn ghost" type="button">Clear saved details</button>
+  <!-- Step 1: pick the type of cover page -->
+  <section id="cpPick" aria-labelledby="cpPickTitle">
+    <h1 class="page-title" id="cpPickTitle">Which cover page?</h1>
+    <p class="page-sub">Pick one to get started.</p>
+    <div class="tools cp-cards">
+      <button type="button" class="tool-card cp-card" data-type="assignment" aria-label="Assignment cover page">
+        <div class="tool-art">
+          <svg viewBox="0 0 260 170" class="doodle" role="img" aria-label="Doodle of an assignment cover page with a pencil">
+            <g class="bob">
+              <rect class="fill" x="78" y="8" width="104" height="154" rx="10" transform="rotate(-3 130 84)"/>
+              <g transform="rotate(-3 130 84)">
+                <circle class="fill2" cx="130" cy="32" r="12"/>
+                <path class="thin" d="M125 32l4 4 7-8"/>
+                <path d="M104 58h52"/>
+                <path class="thin" d="M110 70h40M114 80h32"/>
+                <path class="thin" d="M96 104h30M134 104h30M96 118h30M134 118h30"/>
+                <path class="thin" d="M96 138h68"/>
+              </g>
+            </g>
+            <g class="bob2">
+              <g transform="rotate(38 212 100)">
+                <rect class="fill2" x="204" y="66" width="16" height="58" rx="3"/>
+                <path class="fill" d="M204 124l8 15 8-15z"/>
+                <path class="thin" d="M204 78h16"/>
+              </g>
+            </g>
+            <path d="M44 42l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/>
+            <path class="thin" d="M24 120c10-12 20 12 30 0s20 12 30 0"/>
+          </svg>
+        </div>
+        <div class="tool-body"><div><h2>Assignment</h2><p>Cover page for theory courses</p></div></div>
+      </button>
+      <button type="button" class="tool-card cp-card blue" data-type="lab" aria-label="Lab report cover page">
+        <div class="tool-art">
+          <svg viewBox="0 0 260 170" class="doodle" role="img" aria-label="Doodle of a lab report cover page with a flask">
+            <g class="bob">
+              <rect class="fill" x="78" y="8" width="104" height="154" rx="10" transform="rotate(3 130 84)"/>
+              <g transform="rotate(3 130 84)">
+                <circle class="fill2" cx="130" cy="32" r="12"/>
+                <path class="thin" d="M125 32l4 4 7-8"/>
+                <path d="M104 58h52"/>
+                <path class="thin" d="M110 70h40M114 80h32"/>
+                <path class="thin" d="M96 104h30M134 104h30M96 118h30M134 118h30"/>
+                <path class="thin" d="M96 138h68"/>
+              </g>
+            </g>
+            <g class="bob2">
+              <path class="fill2" d="M200 62h16v22l16 30a6 6 0 0 1-5 9h-38a6 6 0 0 1-5-9l16-30z"/>
+              <path class="thin" d="M196 62h24M190 108h36"/>
+              <circle class="fill" cx="208" cy="118" r="3"/>
+            </g>
+            <path d="M44 42l4 10 10 4-10 4-4 10-4-10-10-4 10-4z"/>
+            <path class="thin" d="M24 120c10-12 20 12 30 0s20 12 30 0"/>
+          </svg>
+        </div>
+        <div class="tool-body"><div><h2>Lab Report</h2><p>Cover page for lab courses</p></div></div>
+      </button>
+    </div>
   </section>
 
+  <!-- Step 2: the form for the chosen type -->
+  <div id="cpFormWrap" class="hidden">
+    <button id="cpBack" class="cp-back" type="button" aria-label="Back to cover page types">&#8249; Back</button>
+    <section class="card" aria-live="polite">
+      <h3 id="cpTitle">Assignment cover page</h3>
+      <p class="hint">Fill in the details and get a ready-to-print PDF. Everything stays on your phone, nothing is uploaded.</p>
+      <div id="cpForm" class="cp-form"></div>
+      <button id="cpGo" class="btn" type="button">Generate PDF</button>
+      <button id="cpClear" class="btn ghost" type="button">Clear saved details</button>
+    </section>
   <section id="cpDone" class="card hidden" aria-live="polite">
     <h3>Your PDF is ready</h3>
     <p class="hint" id="cpName"></p>
     <a id="cpDl" class="btn" href="#" download>Download PDF</a>
     <button id="cpShare" class="btn ghost" type="button">Open / Share</button>
   </section>
+  </div>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="./vendor/pdf-lib.min.js"></script>
 <script src="./config.js"></script>
 <script src="./common.js"></script>
+<script src="./courses.js"></script>
 <script src="./cover-pdf.js"></script>
 <script src="./cover.js"></script>
 </body>
