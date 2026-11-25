@@ -57,13 +57,25 @@
 
     <!-- Course editor -->
     <h2 class="sec-title">Your courses</h2>
+    <section class="card" aria-labelledby="pkTitle">
+      <h3 id="pkTitle">Load semester courses</h3>
+      <p class="hint">Pick your department and semester. Course names and credits fill in by themselves and cannot be changed. You only enter marks.</p>
+      <div class="grid2">
+        <div class="field"><label for="dDep">Department</label><select id="dDep"></select></div>
+        <div class="field"><label for="dSem">Semester</label><select id="dSem"></select></div>
+      </div>
+      <div class="grid2" id="dSlots" style="margin-top:10px"></div>
+      <button class="btn" id="dLoad" type="button" style="margin-top:12px">Load courses</button>
+    </section>
     <div id="courses"></div>
-    <button class="add" id="addCourse" type="button">+ Add course</button>
+    <p class="hint" id="noCourses" hidden>No courses yet. Choose a department and semester above, then tap Load courses.</p>
+    <button class="add" id="addCourse" type="button" hidden>+ Add course</button>
     <p class="save-st" id="saveSt" role="status" aria-live="polite">&nbsp;</p>
   </main>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="/common.js"></script>
+<script src="/courses.js"></script>
 <script>
 (function(){
 "use strict";
@@ -150,8 +162,9 @@ function renderCourses(){
   var root=$("courses");root.innerHTML="";
   courses.forEach(function(c,ci){
     var el=document.createElement("div");el.className="card course";el.dataset.c=ci;
-    var h='<div class="c-head"><input data-ck="name" placeholder="Course name" maxlength="60" value="'+esc(c.name)+'" aria-label="Course name">'
-      +'<input data-ck="credit" inputmode="decimal" placeholder="Credit" value="'+esc(c.credit)+'" aria-label="Credit">'
+    var lk=BUPC.find(c.name),locked=!!(lk&&Number(lk.credit)===num(c.credit)),ro=locked?" readonly":"";
+    var h='<div class="c-head"><input data-ck="name" placeholder="Course name" maxlength="60" value="'+esc(c.name)+'" aria-label="Course name"'+ro+'>'
+      +'<input data-ck="credit" inputmode="decimal" placeholder="Credit" value="'+esc(c.credit)+'" aria-label="Credit"'+ro+'>'
       +'<button class="del" type="button" data-delc aria-label="Remove course">'+X+'</button></div>';
     h+='<p class="p-lab"><span>Incourse part</span><span>Got</span><span>Out of</span><span></span></p><div class="p-rows">';
     c.parts.forEach(function(p,pi){h+=partRow(p,pi)});
@@ -189,6 +202,36 @@ $("addCourse").addEventListener("click",function(){
   if(courses.length>=20){toast("At most 20 courses");return}
   courses.push(blankCourse());renderCourses();recalc();schedule();
   var last=$("courses").lastElementChild;if(last)last.scrollIntoView({behavior:"smooth",block:"nearest"});
+});
+
+/* ---------- department + semester: load fixed course names and credits ---------- */
+function syncEmpty(){$("noCourses").hidden=courses.length>0}
+function renderSlots(){
+  var d=$("dDep").value,n=+$("dSem").value,box=$("dSlots");box.innerHTML="";
+  if(!d||!n)return;
+  BUPC.slots(d,n).forEach(function(sl,i){
+    var f=document.createElement("div");f.className="field";f.style.gridColumn="1/-1";
+    f.innerHTML='<label for="dSlot'+i+'">'+esc(sl.label)+'</label><select id="dSlot'+i+'"><option value="">Skip</option>'
+      +sl.options.map(function(c){return '<option value="'+esc(c.name)+'">'+esc(c.name)+' ('+c.credit+')</option>'}).join("")+'</select>';
+    box.appendChild(f);
+  });
+}
+BUPC.mount($("dDep"),$("dSem"),renderSlots);
+renderSlots();
+$("dLoad").addEventListener("click",function(){
+  var d=$("dDep").value,n=+$("dSem").value;
+  if(!d||!n){toast("Choose department and semester first");return}
+  if(!loaded){toast("Please wait, your data is loading");return}
+  var list=BUPC.courses(d,n);
+  BUPC.slots(d,n).forEach(function(sl,i){
+    var el=$("dSlot"+i),c=el&&el.value?BUPC.find(el.value):null;
+    if(c&&!list.some(function(x){return x.name===c.name}))list.push(c);
+  });
+  var hasMarks=courses.some(function(c){return c.parts.some(function(p){return String(p.g).trim()!==""})});
+  if(courses.length&&!confirm(hasMarks?"Replace your current courses with this semester? The marks you entered will be lost.":"Replace your current courses with this semester?"))return;
+  courses=list.slice(0,20).map(function(c){var b=blankCourse();b.name=c.name;b.credit=String(c.credit);return b});
+  renderCourses();recalc();syncEmpty();schedule();
+  toast(courses.length+" courses loaded");
 });
 
 /* ---------- target CG is remembered on this device ---------- */
@@ -244,8 +287,7 @@ fetch("/api/courses",{credentials:"same-origin",headers:authHeaders()}).then(fun
   courses=(d.courses||[]).map(function(c){
     return{name:toStr(c.name),credit:toStr(c.credit),parts:(c.parts||[]).map(function(p){return{n:toStr(p.n),g:toStr(p.g),o:toStr(p.o)}})};
   });
-  if(!courses.length)courses=[blankCourse()];
-  loaded=true;renderCourses();recalc();
+  loaded=true;renderCourses();recalc();syncEmpty();
 }).catch(function(e){
   if(e===0)return;
   setStatus("Could not load your courses. Reload to try again.",true);
