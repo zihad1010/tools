@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f4f2ec">
+  <meta name="theme-color" content="#f1f1f2">
   <script>try{document.documentElement.dataset.theme=localStorage.getItem("bupTheme")||"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
   <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atma:wght@500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body class="gl">
@@ -60,7 +61,7 @@
     <div class="card">
       <h3>Courses</h3>
       <p class="hint" id="cg-hint">Course name, credit and grade.</p>
-      <div id="cg-rows"></div>
+      <div class="hs"><div id="cg-rows"></div></div>
       <button class="add" data-add="cg">+ Add course</button>
     </div>
     <button class="btn ms-btn" id="ms-btn" type="button" aria-expanded="false" aria-controls="ms">Generate marksheet</button>
@@ -80,7 +81,7 @@
     </div>
     <div class="ap" id="ap" data-k="4" aria-live="polite">
       <div class="ap-art" id="ap-art"></div>
-      <div class="ap-txt"><span class="ap-tag">CG 4.00 &middot; A+</span><strong id="ap-t">marks দিন, দেখি CG 4.00 হয় কিনা</strong><span class="ap-s" id="ap-s">Incourse marks লিখলেই বলে দেব</span></div>
+      <div class="ap-bubble"><div class="ap-txt"><span class="ap-tag">CG 4.00 &middot; A+</span><strong id="ap-t">marks দিন, দেখি CG 4.00 হয় কিনা</strong><span class="ap-s" id="ap-s">Incourse marks লিখলেই বলে দেব</span></div></div>
     </div>
     <div class="card">
       <h3>Incourse parts</h3>
