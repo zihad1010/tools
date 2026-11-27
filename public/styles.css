@@ -231,3 +231,36 @@ body.home .dash-pin .tool-card.compact{margin-bottom:0}
 .cp-card .tool-body p{font-size:12.5px}
 .cp-back{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 16px;font-weight:600;font-size:14px;margin:6px 0 10px}
 @media(max-width:340px){.cp-cards{grid-template-columns:1fr}}
+
+/* ---------- Dashboard: course select (white classic buttons) ---------- */
+.cs{margin:20px 0 14px}
+.cs-main,.cs-course{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;font-family:inherit;padding:15px 18px;border-radius:16px;border:1px solid #ece7df;background:#fff;color:#12262e;font-size:16px;font-weight:600;box-shadow:0 5px 12px -6px rgba(40,30,10,.28),0 1px 2px rgba(40,30,10,.08);transition:transform .15s,box-shadow .15s,border-color .15s}
+.cs-main:active,.cs-course:active{transform:translateY(1px);box-shadow:0 2px 5px -3px rgba(40,30,10,.3),0 1px 1px rgba(40,30,10,.08)}
+.cs-chev{flex:0 0 auto;transition:transform .2s}
+.cs-main[aria-expanded=true] .cs-chev{transform:rotate(180deg)}
+.cs-list{display:grid;gap:10px;margin-top:12px}
+.cs-list[hidden]{display:none}
+.cs-item{display:grid;gap:8px}
+.cs-course{font-size:15px;font-weight:500}
+.cs-course.on{border-color:var(--teal);box-shadow:0 6px 14px -7px rgba(47,94,110,.45),0 1px 2px rgba(40,30,10,.08)}
+.cs-name{min-width:0;word-break:break-word}
+.cs-cr{flex:0 0 auto;color:#7a8a8f;font-size:13px;font-weight:600}
+.cs-edit{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;animation:csin .18s ease}
+.cs-edit .add:last-child{margin-bottom:0}
+.cs-empty{margin:0;padding:14px 4px;color:var(--muted);font-size:13.5px;text-align:center}
+@keyframes csin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+:root[data-theme=dark] .cs-main,:root[data-theme=dark] .cs-course{background:var(--card);color:var(--ink);border-color:var(--line);box-shadow:0 6px 14px -8px rgba(0,0,0,.6)}
+:root[data-theme=dark] .cs-cr{color:var(--muted)}
+
+/* ---------- green stroke on the card you are typing in ---------- */
+body.gl .card,body.gl .cs-edit{transition:border-color .15s,box-shadow .15s}
+body.gl .card:focus-within,body.gl .cs-edit:focus-within{border-color:var(--ok);box-shadow:0 0 0 1px var(--ok)}
+/* ---------- marksheet ---------- */
+.ms-btn{margin:0 0 14px}
+.ms[hidden]{display:none}
+.ms-sub{margin:0 0 10px;color:var(--muted);font-size:13px}
+.ms-t td:not(:first-child),.ms-t th:not(:first-child){text-align:right}
+.ms-sum{margin-top:12px;display:grid;gap:6px}
+.ms-sum div{display:flex;justify-content:space-between;gap:10px;font-size:14px;color:var(--ink2)}
+.ms-sum b{color:var(--ink)}
+.ms-sum .tot{border-top:1px solid var(--line);padding-top:8px;margin-top:2px;font-size:16px}
