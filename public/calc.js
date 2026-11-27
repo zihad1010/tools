@@ -9,6 +9,7 @@
   function num(v){var n=parseFloat(String(v).replace(",","."));return isFinite(n)?n:NaN}
   function f2(n){return isFinite(n)?(Math.round(n*100)/100).toFixed(2):"--"}
   function f1(n){return isFinite(n)?String(Math.round(n*100)/100):"--"}
+  function isBad(g,o){var a=num(g),b=num(o);return isFinite(a)&&b>0&&a>b}
   function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}
   function $(id){return document.getElementById(id)}
 
@@ -51,9 +52,16 @@
     rows.forEach(function(r,i){
       var el=document.createElement("div");el.className="row "+kind;
       el.innerHTML=TPL[kind](r,i)+'<button class="del" aria-label="Remove row">'+X+'</button>';
+      function mark(){var gi=el.querySelector('[data-k="g"]');if(gi&&(kind==="inc"||kind==="ct"))gi.classList.toggle("cp-bad",isBad(r.g,r.o))}
+      mark();
       Array.prototype.forEach.call(el.querySelectorAll("[data-k]"),function(inp){
         inp.addEventListener("input",function(){
+          if((kind==="inc"||kind==="ct")&&inp.dataset.k==="g"&&isBad(inp.value,r.o)){
+            inp.value=r.o; /* got can never be more than out of */
+            inp.classList.add("cp-bad");setTimeout(function(){mark()},500);
+          }
           r[inp.dataset.k]=inp.value;
+          if(kind==="inc"||kind==="ct")mark();
           if(kind==="cg"&&r.lock&&r.slot!=null&&inp.dataset.k==="n"){
             var c=BUPC.find(inp.value);r.c=c?String(c.credit):"";
             var ci=el.querySelector('[data-k="c"]');if(ci)ci.value=r.c;
@@ -82,6 +90,32 @@
     $("cg-cr").textContent=f1(tc);
     $("cg-sem").textContent=f2(sem);
   }
+  /* ---------- marksheet (Total CG tab) ---------- */
+  var msOpen=false;
+  function renderMs(){
+    var box=$("ms"),btn=$("ms-btn");if(!box||!btn)return;
+    btn.textContent=msOpen?"Hide marksheet":"Generate marksheet";
+    btn.setAttribute("aria-expanded",msOpen?"true":"false");
+    box.hidden=!msOpen;if(!msOpen)return;
+    var list=[],cr=0,pts=0;
+    S.cg.rows.forEach(function(r,i){
+      var c=num(r.c),g=gp(r.g);
+      if(c>0&&isFinite(g)){list.push({n:(r.n||"").trim()||"Course "+(i+1),c:c,l:r.g,p:g});cr+=c;pts+=c*g}
+    });
+    if(!list.length){box.innerHTML='<h3>Marksheet</h3><p class="hint" style="margin:0">অন্তত একটা course-এ credit আর grade দিন।</p>';return}
+    var h='<h3>Marksheet</h3>'+(S.cg.sem?'<p class="ms-sub">Semester '+esc(S.cg.sem)+'</p>':'<p class="ms-sub">Course-wise result</p>')
+      +'<div class="tbl-wrap"><table class="need ms-t"><thead><tr><th>Course</th><th>Credit</th><th>Grade</th><th>GP</th></tr></thead><tbody>';
+    list.forEach(function(x){h+='<tr><td class="g">'+esc(x.n)+'</td><td>'+f1(x.c)+'</td><td>'+esc(x.l)+'</td><td>'+f2(x.p)+'</td></tr>'});
+    h+='</tbody></table></div><div class="ms-sum"><div><span>This semester GPA</span><b>'+f2(pts/cr)+'</b></div><div><span>Credits this semester</span><b>'+f1(cr)+'</b></div>';
+    var pc=num(S.cg.prevc),pg=num(S.cg.prev),tc=cr,tp=pts;
+    if(pc>0&&isFinite(pg)){tc+=pc;tp+=pc*pg;h+='<div><span>Previous CGPA</span><b>'+f2(pg)+'</b></div><div><span>Previous credits</span><b>'+f1(pc)+'</b></div>'}
+    h+='<div class="tot"><span>Overall CGPA</span><b>'+f2(tp/tc)+'</b></div><div><span>Total credits</span><b>'+f1(tc)+'</b></div></div>';
+    box.innerHTML=h;
+  }
+  $("ms-btn").addEventListener("click",function(){
+    msOpen=!msOpen;renderMs();
+    if(msOpen)$("ms").scrollIntoView({behavior:"smooth",block:"nearest"});
+  });
   /* ---------- A+ (CG 4.00) card: doodle cat, same doodle style as the home cards ---------- */
   var DROP_P='class="tear thin"';
   function cat(k){
@@ -132,21 +166,21 @@
   function renderAp(req){
     var box=$("ap");if(!box)return;
     var rr=0,k,t,sub;
-    if(req==null||!isFinite(req)){k=4;t="ভাই, marks দিন, দেখি CG 4.00 হয় কিনা";sub="Incourse marks লিখলেই বলে দেব"}
+    if(req==null||!isFinite(req)){k=4;t="marks দিন, দেখি CG 4.00 হয় কিনা";sub="Incourse marks লিখলেই বলে দেব"}
     else{
     rr=req>0?Math.ceil(Math.round(req*1e6)/1e4)/100:0;
-    if(req>100){k=3;t="ভাই, CG 4.00 আর সম্ভব না…";sub="Final-এ ১০০-র বেশি লাগত"}
-    else if(rr>=90){k=2;t="ভাই, প্রায় perfect লাগবে!";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
-    else if(rr>=80){k=1;t="ভাই, একটু কষ্ট করলে হবে!";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
-    else if(req<=0){k=0;t="ভাই, CG 4.00 তো পাকা!";sub="Secured"}
-    else{k=0;t="ভাই, Easily CG 4.00 সম্ভব";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
+    if(req>100){k=3;t="CG 4.00 আর সম্ভব না…";sub="Final-এ ১০০-র বেশি লাগত"}
+    else if(rr>=90){k=2;t="Possible আবার Impossible, দুটোই!";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
+    else if(rr>=80){k=1;t="একটু কষ্ট করলে হবে!";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
+    else if(req<=0){k=0;t="CG 4.00 তো পাকা!";sub="Secured"}
+    else{k=0;t="Easily CG 4.00 সম্ভব";sub="Final-এ লাগবে "+f1(rr)+" / 100"}
     }
     if(k!==apState){$("ap-art").innerHTML=cat(k);box.dataset.k=k;apState=k}
     $("ap-t").textContent=t;$("ap-s").textContent=sub;box.hidden=false;
   }
   function calcInc(){
     var g=0,o=0;
-    S.inc.rows.forEach(function(r){var a=num(r.g),b=num(r.o);if(isFinite(a)&&b>0){g+=a;o+=b}});
+    S.inc.rows.forEach(function(r){var a=num(r.g),b=num(r.o);if(isFinite(a)&&b>0&&a<=b){g+=a;o+=b}});
     var mx=num(S.inc.max),fw=num(S.inc.fw);
     $("inc-out").textContent=o>0?f1(g)+" / "+f1(mx>0?mx:o):"--";
     $("inc-pct").textContent=(mx>0&&o>0)?f1(g/mx*100)+"%":"--";
@@ -167,7 +201,7 @@
   }
   function calcCT(){
     var p=[];
-    S.ct.rows.forEach(function(r){var a=num(r.g),b=num(r.o);if(isFinite(a)&&b>0)p.push(a/b*100)});
+    S.ct.rows.forEach(function(r){var a=num(r.g),b=num(r.o);if(isFinite(a)&&b>0&&a<=b)p.push(a/b*100)});
     p.sort(function(a,b){return b-a});
     var n=parseInt(S.ct.best,10);if(!(n>0))n=p.length;
     // Divide by the number the user set (missing CTs count as 0); with no setting, use all entered CTs.
@@ -179,19 +213,22 @@
   }
   function calcMid(){
     var g=num(S.mid.g),o=num(S.mid.o),w=num(S.mid.w);
-    var ok=isFinite(g)&&o>0;
+    var ok=isFinite(g)&&o>0&&g<=o;
+    var mg=$("mid-g");if(mg)mg.classList.toggle("cp-bad",isBad(S.mid.g,S.mid.o));
     $("mid-out").textContent=ok?f1(g/o*100)+"%":"--";
     $("mid-l").textContent=ok?letter(g/o*100):"--";
     $("mid-sc").textContent=ok&&w>0?f2(g/o*w)+" / "+f1(w):"--";
   }
-  function update(){save();calcCG();calcInc();calcCT();calcMid()}
+  function update(){save();calcCG();calcInc();calcCT();calcMid();renderMs()}
 
   /* ---------- static inputs ---------- */
-  function bind(id,obj,key){var el=$(id);el.value=obj[key]||"";el.addEventListener("input",function(){obj[key]=el.value;update()})}
+  function bind(id,obj,key,lim){var el=$(id);el.value=obj[key]||"";el.addEventListener("input",function(){
+    if(lim&&isBad(el.value,obj.o))el.value=obj.o; /* got can never be more than out of */
+    obj[key]=el.value;update()})}
   bind("cg-prev",S.cg,"prev");bind("cg-prevc",S.cg,"prevc");
   bind("inc-max",S.inc,"max");bind("inc-fw",S.inc,"fw");
   bind("ct-best",S.ct,"best");bind("ct-w",S.ct,"w");
-  bind("mid-g",S.mid,"g");bind("mid-o",S.mid,"o");bind("mid-w",S.mid,"w");
+  bind("mid-g",S.mid,"g",true);bind("mid-o",S.mid,"o");bind("mid-w",S.mid,"w");
   var sc=$("scale");
   GRADES.forEach(function(g){var s=document.createElement("span");s.innerHTML="<b>"+g[0]+"</b>"+g[1].toFixed(2)+"<br>"+(g[0]==="F"?"&lt;40":minMark(g[0])+"+");sc.appendChild(s)});
 
