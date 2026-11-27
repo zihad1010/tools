@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atma:wght@500;700&display=swap">
   <link rel="stylesheet" href="./styles.css">
 </head>
-<body>
+<body class="gl">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
 <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></symbol>
@@ -63,6 +63,8 @@
       <div id="cg-rows"></div>
       <button class="add" data-add="cg">+ Add course</button>
     </div>
+    <button class="btn ms-btn" id="ms-btn" type="button" aria-expanded="false" aria-controls="ms">Generate marksheet</button>
+    <div class="card ms" id="ms" hidden aria-live="polite"></div>
     <div class="card">
       <h3>Grade scale</h3>
       <div class="scale" id="scale"></div>
@@ -78,7 +80,7 @@
     </div>
     <div class="ap" id="ap" data-k="4" aria-live="polite">
       <div class="ap-art" id="ap-art"></div>
-      <div class="ap-txt"><span class="ap-tag">CG 4.00 &middot; A+</span><strong id="ap-t">ভাই, marks দিন, দেখি CG 4.00 হয় কিনা</strong><span class="ap-s" id="ap-s">Incourse marks লিখলেই বলে দেব</span></div>
+      <div class="ap-txt"><span class="ap-tag">CG 4.00 &middot; A+</span><strong id="ap-t">marks দিন, দেখি CG 4.00 হয় কিনা</strong><span class="ap-s" id="ap-s">Incourse marks লিখলেই বলে দেব</span></div>
     </div>
     <div class="card">
       <h3>Incourse parts</h3>
