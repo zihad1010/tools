@@ -10,11 +10,12 @@
   <title>My Dashboard</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body>
+<body class="gl">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></symbol>
 <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
 </defs></svg>
 <div class="app">
   <header class="topbar">
@@ -27,6 +28,12 @@
   <main>
     <h1 class="page-title" id="hello">Welcome</h1>
     <p class="page-sub">Your marksheet. Only you can see and change it.</p>
+
+    <!-- Course select: always first -->
+    <div class="cs" id="cs">
+      <button class="cs-main" id="csBtn" type="button" aria-expanded="false" aria-controls="csList"><span>Select course</span><svg class="ic cs-chev" aria-hidden="true"><use href="#i-chev"/></svg></button>
+      <div class="cs-list" id="csList" hidden></div>
+    </div>
 
     <!-- Marksheet -->
     <section class="card mk-card" aria-labelledby="mkTitle">
@@ -67,7 +74,6 @@
       <div class="grid2" id="dSlots" style="margin-top:10px"></div>
       <button class="btn" id="dLoad" type="button" style="margin-top:12px">Load courses</button>
     </section>
-    <div id="courses"></div>
     <p class="hint" id="noCourses" hidden>No courses yet. Choose a department and semester above, then tap Load courses.</p>
     <button class="add" id="addCourse" type="button" hidden>+ Add course</button>
     <p class="save-st" id="saveSt" role="status" aria-live="polite">&nbsp;</p>
@@ -103,7 +109,7 @@ function sums(c){
   c.parts.forEach(function(p){
     var g=num(p.g),o=num(p.o);
     if(o>0)full+=o;
-    if(isFinite(g)&&o>0){got+=g;gotFull+=o;entered++}
+    if(isFinite(g)&&o>0&&g<=o){got+=g;gotFull+=o;entered++}
   });
   return{got:got,full:full,entered:entered};
 }
@@ -158,34 +164,69 @@ function partRow(p,pi){
     +'<input data-k="o" inputmode="decimal" placeholder="Out of" value="'+esc(p.o)+'" aria-label="Full marks">'
     +'<button class="del" type="button" data-delp aria-label="Remove part">'+X+'</button></div>';
 }
+var openIdx=-1;
+function setList(open){
+  $("csList").hidden=!open;
+  var b=$("csBtn");b.setAttribute("aria-expanded",open?"true":"false");
+}
+function editorEl(c,ci){
+  var el=document.createElement("div");el.className="cs-edit course";el.dataset.c=ci;
+  var lk=BUPC.find(c.name),locked=!!(lk&&Number(lk.credit)===num(c.credit)),ro=locked?" readonly":"";
+  var h='<div class="c-head"><input data-ck="name" placeholder="Course name" maxlength="60" value="'+esc(c.name)+'" aria-label="Course name"'+ro+'>'
+    +'<input data-ck="credit" inputmode="decimal" placeholder="Credit" value="'+esc(c.credit)+'" aria-label="Credit"'+ro+'>'
+    +'<button class="del" type="button" data-delc aria-label="Remove course">'+X+'</button></div>';
+  h+='<p class="p-lab"><span>Incourse part</span><span>Got</span><span>Out of</span><span></span></p><div class="p-rows">';
+  c.parts.forEach(function(p,pi){h+=partRow(p,pi)});
+  h+='</div><button class="add" type="button" data-addp>+ Add part</button>';
+  el.innerHTML=h;return el;
+}
 function renderCourses(){
-  var root=$("courses");root.innerHTML="";
+  var box=$("csList");box.innerHTML="";
+  if(openIdx>=courses.length)openIdx=-1;
+  if(!courses.length){
+    box.innerHTML='<p class="cs-empty">No courses yet. Choose a department and semester below, then tap Load courses.</p>';
+    return;
+  }
   courses.forEach(function(c,ci){
-    var el=document.createElement("div");el.className="card course";el.dataset.c=ci;
-    var lk=BUPC.find(c.name),locked=!!(lk&&Number(lk.credit)===num(c.credit)),ro=locked?" readonly":"";
-    var h='<div class="c-head"><input data-ck="name" placeholder="Course name" maxlength="60" value="'+esc(c.name)+'" aria-label="Course name"'+ro+'>'
-      +'<input data-ck="credit" inputmode="decimal" placeholder="Credit" value="'+esc(c.credit)+'" aria-label="Credit"'+ro+'>'
-      +'<button class="del" type="button" data-delc aria-label="Remove course">'+X+'</button></div>';
-    h+='<p class="p-lab"><span>Incourse part</span><span>Got</span><span>Out of</span><span></span></p><div class="p-rows">';
-    c.parts.forEach(function(p,pi){h+=partRow(p,pi)});
-    h+='</div><button class="add" type="button" data-addp>+ Add part</button>';
-    el.innerHTML=h;root.appendChild(el);
+    var item=document.createElement("div");item.className="cs-item";item.dataset.i=ci;
+    var on=ci===openIdx;
+    item.innerHTML='<button type="button" class="cs-course'+(on?' on':'')+'" data-pick aria-expanded="'+(on?'true':'false')+'"><span class="cs-name">'+esc(cname(c,ci))+'</span><span class="cs-cr">'+esc(c.credit)+' cr</span></button>';
+    if(on)item.appendChild(editorEl(c,ci));
+    box.appendChild(item);
   });
 }
-$("courses").addEventListener("input",function(e){
+$("csBtn").addEventListener("click",function(){setList($("csList").hidden)});
+$("csList").addEventListener("input",function(e){
   var inp=e.target,card=inp.closest(".course");if(!card)return;
   var c=courses[+card.dataset.c];if(!c)return;
-  if(inp.dataset.ck){c[inp.dataset.ck]=inp.value}
-  else if(inp.dataset.k){
-    var row=inp.closest(".row"),p=c.parts[+row.dataset.p];p[inp.dataset.k]=inp.value;
+  if(inp.dataset.ck){
+    c[inp.dataset.ck]=inp.value;
+    if(inp.dataset.ck==="name"||inp.dataset.ck==="credit"){
+      var it=card.closest(".cs-item");
+      it.querySelector(".cs-name").textContent=cname(c,+card.dataset.c);
+      it.querySelector(".cs-cr").textContent=c.credit+" cr";
+    }
+  }else if(inp.dataset.k){
+    var row=inp.closest(".row"),p=c.parts[+row.dataset.p];
+    if(inp.dataset.k==="g"){var gv=num(inp.value),ov=num(p.o);if(isFinite(gv)&&ov>0&&gv>ov)inp.value=p.o} /* got can never be more than out of */
+    p[inp.dataset.k]=inp.value;
     var g=num(p.g),o=num(p.o),gi=row.querySelector('[data-k="g"]');
     gi.classList.toggle("cp-bad",isFinite(g)&&(g<0||(o>0&&g>o)));
   }else return;
   recalc();schedule();
 });
-$("courses").addEventListener("click",function(e){
+$("csList").addEventListener("click",function(e){
   var btn=e.target.closest("button");if(!btn)return;
-  var card=btn.closest(".course"),ci=+card.dataset.c,c=courses[ci];
+  if(btn.hasAttribute("data-pick")){
+    var ii=+btn.closest(".cs-item").dataset.i;
+    openIdx=openIdx===ii?-1:ii; /* only one course input panel at a time */
+    renderCourses();
+    var it=$("csList").children[ii];
+    if(openIdx===ii&&it)it.scrollIntoView({behavior:"smooth",block:"nearest"});
+    return;
+  }
+  var card=btn.closest(".course");if(!card)return;
+  var ci=+card.dataset.c,c=courses[ci];
   if(btn.hasAttribute("data-addp")){
     if(c.parts.length>=12){toast("At most 12 parts per course");return}
     c.parts.push({n:"",g:"",o:""});
@@ -194,14 +235,15 @@ $("courses").addEventListener("click",function(e){
   }else if(btn.hasAttribute("data-delc")){
     var has=c.name.trim()||c.parts.some(function(p){return String(p.g).trim()!==""});
     if(has&&!confirm("Remove this course and its marks?"))return;
-    courses.splice(ci,1);
+    courses.splice(ci,1);openIdx=-1;
   }else return;
   renderCourses();recalc();schedule();
 });
 $("addCourse").addEventListener("click",function(){
   if(courses.length>=20){toast("At most 20 courses");return}
-  courses.push(blankCourse());renderCourses();recalc();schedule();
-  var last=$("courses").lastElementChild;if(last)last.scrollIntoView({behavior:"smooth",block:"nearest"});
+  courses.push(blankCourse());openIdx=courses.length-1;setList(true);
+  renderCourses();recalc();schedule();
+  window.scrollTo({top:0,behavior:"smooth"});
 });
 
 /* ---------- department + semester: load fixed course names and credits ---------- */
@@ -230,7 +272,8 @@ $("dLoad").addEventListener("click",function(){
   var hasMarks=courses.some(function(c){return c.parts.some(function(p){return String(p.g).trim()!==""})});
   if(courses.length&&!confirm(hasMarks?"Replace your current courses with this semester? The marks you entered will be lost.":"Replace your current courses with this semester?"))return;
   courses=list.slice(0,20).map(function(c){var b=blankCourse();b.name=c.name;b.credit=String(c.credit);return b});
-  renderCourses();recalc();syncEmpty();schedule();
+  openIdx=-1;setList(true);renderCourses();recalc();syncEmpty();schedule();
+  window.scrollTo({top:0,behavior:"smooth"});
   toast(courses.length+" courses loaded");
 });
 
