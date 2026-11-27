@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#efe9e0">
+  <meta name="theme-color" content="#f1f1f2">
   <meta name="robots" content="noindex">
   <script>try{document.documentElement.dataset.theme=localStorage.getItem("bupTheme")||"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
   <title>My Dashboard</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="gl">
@@ -234,8 +235,9 @@ $("csList").addEventListener("click",function(e){
     c.parts.splice(+btn.closest(".row").dataset.p,1);
   }else if(btn.hasAttribute("data-delc")){
     var has=c.name.trim()||c.parts.some(function(p){return String(p.g).trim()!==""});
-    if(has&&!confirm("Remove this course and its marks?"))return;
-    courses.splice(ci,1);openIdx=-1;
+    var rm=function(){courses.splice(ci,1);openIdx=-1;renderCourses();recalc();schedule()};
+    if(has){askConfirm({title:"Remove course?",text:"This course and its marks will be removed.",okText:"Remove"},rm);return}
+    rm();return;
   }else return;
   renderCourses();recalc();schedule();
 });
@@ -270,11 +272,17 @@ $("dLoad").addEventListener("click",function(){
     if(c&&!list.some(function(x){return x.name===c.name}))list.push(c);
   });
   var hasMarks=courses.some(function(c){return c.parts.some(function(p){return String(p.g).trim()!==""})});
-  if(courses.length&&!confirm(hasMarks?"Replace your current courses with this semester? The marks you entered will be lost.":"Replace your current courses with this semester?"))return;
+  function apply(){
   courses=list.slice(0,20).map(function(c){var b=blankCourse();b.name=c.name;b.credit=String(c.credit);return b});
   openIdx=-1;setList(true);renderCourses();recalc();syncEmpty();schedule();
   window.scrollTo({top:0,behavior:"smooth"});
   toast(courses.length+" courses loaded");
+  }
+  if(courses.length){
+    askConfirm({title:"Replace courses?",text:hasMarks?"Replace your current courses with this semester? The marks you entered will be lost.":"Replace your current courses with this semester?",okText:"Replace"},apply);
+    return;
+  }
+  apply();
 });
 
 /* ---------- target CG is remembered on this device ---------- */
